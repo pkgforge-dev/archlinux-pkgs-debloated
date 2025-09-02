@@ -9,6 +9,11 @@ case "$ARCH" in
 		EXT=zst
 		git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/mesa.git ./mesa
 		cd ./mesa
+		# remove aarch64 drivers from x86_64
+		sed -i \
+			-e 's/,asahi//g'     \
+			-e 's/,freedreno//g' \
+			./PKGBUILD
 		;;
 	aarch64)
 		EXT=xz
@@ -60,6 +65,7 @@ elif [ "$ARCH" = 'aarch64' ]; then
 	mv -v ./vulkan-broadcom-*.pkg.tar."$EXT"  ../vulkan-broadcom-mini-"$ARCH".pkg.tar."$EXT"
 	mv -v ./vulkan-panfrost-*.pkg.tar."$EXT"  ../vulkan-panfrost-mini-"$ARCH".pkg.tar."$EXT"
 	mv -v ./vulkan-freedreno-*.pkg.tar."$EXT" ../vulkan-freedreno-mini-"$ARCH".pkg.tar."$EXT"
+	mv -v ./vulkan-asahi-*.pkg.tar."$EXT"     ../vulkan-asahi-mini-"$ARCH".pkg.tar."$EXT"
 fi
 
 cd ..
