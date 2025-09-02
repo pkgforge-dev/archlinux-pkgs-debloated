@@ -13,8 +13,9 @@ case "$ARCH" in
 		cd ./mesa
 		# remove aarch64 drivers from x86_64
 		sed -i \
-			-e 's/,asahi//g'     \
-			-e 's/,freedreno//g' \
+			-e 's/vulkan-asahi//' \
+			-e 's/,asahi//g'      \
+			-e 's/,freedreno//g'  \
 			./PKGBUILD
 		;;
 	aarch64)
