@@ -3,11 +3,14 @@
 set -ex
 
 ARCH="$(uname -m)"
+tmpbuild="$PWD"/tmpbuild
+_cleanup() { rm -rf "$tmpbuild"; }
+trap _cleanup INT TERM EXIT
 
 sed -i -e 's|-O2|-Oz|' /etc/makepkg.conf
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/llvm llvm
-cd ./llvm
+git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/llvm "$tmpbuild"
+cd "$tmpbuild"
 
 case "$ARCH" in
 	x86_64)
@@ -44,5 +47,5 @@ makepkg -fs --noconfirm --skippgpcheck
 ls -la
 mv ./llvm-libs-*.pkg.tar."$EXT" ../llvm-libs-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
-rm -rf ./llvm
+rm -rf "$tmpbuild"
 echo "All done!"

@@ -3,9 +3,12 @@
 set -ex
 
 ARCH="$(uname -m)"
+tmpbuild="$PWD"/tmpbuild
+_cleanup() { rm -rf "$tmpbuild"; }
+trap _cleanup INT TERM EXIT
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/opus.git ./opus
-cd ./opus
+git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/opus.git "$tmpbuild"
+cd "$tmpbuild"
 
 case "$ARCH" in
 	x86_64)
@@ -40,7 +43,7 @@ ls -la
 rm -fv *-docs-*.pkg.tar.* *-debug-*.pkg.tar.*
 mv ./opus-*.pkg.tar."$EXT" ../opus-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
-rm -rf ./opus
+rm -rf "$tmpbuild"
 # keep older name to not break existing CIs
 cp -v ./opus-mini-"$ARCH".pkg.tar."$EXT" ./opus-nano-"$ARCH".pkg.tar."$EXT"
 echo "All done!"

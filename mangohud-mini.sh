@@ -3,14 +3,16 @@
 set -ex
 
 ARCH="$(uname -m)"
+tmpbuild="$PWD"/tmpbuild
+_cleanup() { rm -rf "$tmpbuild"; }
+trap _cleanup INT TERM EXIT
 
 sed -i -e 's|-O2|-Oz|' /etc/makepkg.conf
 
-git clone --depth 1 https://github.com/VHSgunzo/mangohud-PKGBUILD.git ./mangohud-temp
-mv -v ./mangohud-temp/mangohud ./
-rm -rf ./mangohud-temp
-
-cd ./mangohud
+git clone --depth 1 https://github.com/VHSgunzo/mangohud-PKGBUILD.git "$tmpbuild"
+cd "$tmpbuild"
+rm -rf ./lib32-mangohud
+mv -v ./mangohud/PKGBUILD ./
 
 case "$ARCH" in
 	x86_64)
@@ -40,5 +42,5 @@ ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
 mv -v ./mangohud-*.pkg.tar."$EXT" ../mangohud-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
-rm -rf ./mangohud
+rm -rf "$tmpbuild"
 echo "All done!"

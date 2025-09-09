@@ -3,11 +3,14 @@
 set -ex
 
 ARCH="$(uname -m)"
+tmpbuild="$PWD"/tmpbuild
+_cleanup() { rm -rf "$tmpbuild"; }
+trap _cleanup INT TERM EXIT
 
 sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/intel-media-driver.git ./intel-media-driver
-cd ./intel-media-driver
+git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/intel-media-driver.git "$tmpbuild"
+cd "$tmpbuild"
 
 case "$ARCH" in
 	x86_64)
@@ -33,7 +36,7 @@ ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
 mv ./intel-*.pkg.tar."$EXT" ../intel-media-driver-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
-rm -rf ./intel-media-driver
+rm -rf "$tmpbuild"
 # keep older name to not break existing CIs
 cp -v ./intel-media-driver-mini-"$ARCH".pkg.tar."$EXT" ./intel-media-mini-"$ARCH".pkg.tar."$EXT"
 echo "All done!"
