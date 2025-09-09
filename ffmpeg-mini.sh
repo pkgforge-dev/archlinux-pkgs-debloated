@@ -17,9 +17,9 @@ case "$ARCH" in
 		;;
 	aarch64)
 		EXT=xz
-		git clone --depth 1 https://github.com/archlinuxarm/PKGBUILDs.git PKGBUILDs
-		mv ./PKGBUILDs/extra/ffmpeg ./
+		git clone --depth 1 https://github.com/archlinuxarm/PKGBUILDs.git "$tmpbuild"
 		cd "$tmpbuild"
+		mv ./extra/ffmpeg/* ./
 		;;
 	*)
 		>&2 echo "Unsupported Arch: '$ARCH'"
