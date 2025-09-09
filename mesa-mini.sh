@@ -42,7 +42,6 @@ sed -i \
 	-e 's/opencl-mesa//'   \
 	-e 's/r300,//'         \
 	-e 's/r600,//'         \
-	-e 's/softpipe,//'     \
 	-e 's/llvmpipe,//'     \
 	-e 's/swrast,//'       \
 	-e '/sysprof/d'        \
