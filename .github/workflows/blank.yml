@@ -183,9 +183,28 @@ jobs:
             export CMAKE_C_COMPILER_LAUNCHER=sccache
             export CMAKE_CXX_COMPILER_LAUNCHER=sccache
           fi
-          
+
+          COUNT=0
           chmod +x ./*.sh
-          sh ${{ matrix.script }}.sh
+          while :; do
+            if ./${{ matrix.script }}.sh; then
+              >&2 echo "----------------------------------------"
+              >&2 echo "Package built successfully!"
+              >&2 echo "----------------------------------------"
+              break
+            else
+              >&2 echo "----------------------------------------"
+              >&2 echo "Failed to build package, trying again..."
+              >&2 echo "----------------------------------------"
+              COUNT=$(( COUNT + 1))
+            fi
+            if [ "$COUNT" -ge 3 ]; then
+              >&2 echo "----------------------------------------"
+              >&2 echo "Failed to build package 3 times"
+              >&2 echo "----------------------------------------"
+              exit 1
+            fi
+          done
           
           if [ "${{ matrix.script }}" != 'qt6-base-mini' ]; then
             ccache -s -v
