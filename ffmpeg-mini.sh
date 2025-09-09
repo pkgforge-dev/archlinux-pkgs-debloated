@@ -19,7 +19,7 @@ case "$ARCH" in
 		EXT=xz
 		git clone --depth 1 https://github.com/archlinuxarm/PKGBUILDs.git "$tmpbuild"
 		cd "$tmpbuild"
-		mv ./extra/ffmpeg/* ./
+		mv ./extra/ffmpeg/* ./extra/ffmpeg/.* ./
 		;;
 	*)
 		>&2 echo "Unsupported Arch: '$ARCH'"
