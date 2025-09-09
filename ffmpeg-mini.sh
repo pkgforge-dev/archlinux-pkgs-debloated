@@ -6,8 +6,6 @@ ARCH="$(uname -m)"
 tmpbuild="$PWD"/tmpbuild
 _cleanup() { rm -rf "$tmpbuild"; }
 trap _cleanup INT TERM EXIT
-_cleanup() { rm -rf "$tmpbuild"; }
-trap _cleanup INT TERM EXIT
 
 sed -i -e 's|-O2|-Oz|' /etc/makepkg.conf
 
