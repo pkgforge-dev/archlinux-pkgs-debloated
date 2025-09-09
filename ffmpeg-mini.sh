@@ -3,20 +3,23 @@
 set -ex
 
 ARCH="$(uname -m)"
+tmpbuild="$PWD"/tmpbuild
+_cleanup() { rm -rf "$tmpbuild"; }
+trap _cleanup INT TERM EXIT
 
 sed -i -e 's|-O2|-Oz|' /etc/makepkg.conf
 
 case "$ARCH" in
 	x86_64)
 		EXT=zst
-		git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/ffmpeg.git ffmpeg
-		cd ./ffmpeg
+		git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/ffmpeg.git "$tmpbuild"
+		cd "$tmpbuild"
 		;;
 	aarch64)
 		EXT=xz
-		git clone --depth 1 https://github.com/archlinuxarm/PKGBUILDs.git PKGBUILDs
-		mv ./PKGBUILDs/extra/ffmpeg ./
-		cd ./ffmpeg
+		git clone --depth 1 https://github.com/archlinuxarm/PKGBUILDs.git "$tmpbuild"
+		cd "$tmpbuild"
+		mv ./extra/ffmpeg/* ./extra/ffmpeg/.* ./
 		;;
 	*)
 		>&2 echo "Unsupported Arch: '$ARCH'"
@@ -43,5 +46,5 @@ ls -la
 rm -f ./ffmpeg-docs-*.pkg.tar.* ./ffmpeg-debug-*.pkg.tar.*
 mv ./ffmpeg-*.pkg.tar."$EXT" ../ffmpeg-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
-rm -rf ./ffmpeg
+rm -rf "$tmpbuild"
 echo "All done!"

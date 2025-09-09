@@ -3,11 +3,14 @@
 set -ex
 
 ARCH="$(uname -m)"
+tmpbuild="$PWD"/tmpbuild
+_cleanup() { rm -rf "$tmpbuild"; }
+trap _cleanup INT TERM EXIT
 
 sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/qt6-base qt6-base
-cd ./qt6-base
+git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/qt6-base "$tmpbuild"
+cd "$tmpbuild"
 
 case "$ARCH" in
 	x86_64)
@@ -41,7 +44,7 @@ ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
 mv -v ./qt6-base-*.pkg.tar."$EXT" ../qt6-base-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
-rm -rf ./qt6-base
+rm -rf "$tmpbuild"
 # keep older name to not break existing CIs
 cp -v ./qt6-base-mini-"$ARCH".pkg.tar."$EXT" ./qt6-base-iculess-"$ARCH".pkg.tar."$EXT"
 echo "All done!"

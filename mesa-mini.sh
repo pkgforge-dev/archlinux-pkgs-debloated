@@ -3,12 +3,15 @@
 set -ex
 
 ARCH="$(uname -m)"
+tmpbuild="$PWD"/tmpbuild
+_cleanup() { rm -rf "$tmpbuild"; }
+trap _cleanup INT TERM EXIT
 
 case "$ARCH" in
 	x86_64)
 		EXT=zst
-		git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/mesa.git ./mesa
-		cd ./mesa
+		git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/mesa.git "$tmpbuild"
+		cd "$tmpbuild"
 		# remove aarch64 drivers from x86_64
 		sed -i \
 			-e '/_pick vkfdreno/d'    \
@@ -21,8 +24,8 @@ case "$ARCH" in
 		;;
 	aarch64)
 		EXT=xz
-		git clone --depth 1 https://github.com/archlinuxarm/PKGBUILDs ./mesa
-		cd ./mesa
+		git clone --depth 1 https://github.com/archlinuxarm/PKGBUILDs "$tmpbuild"
+		cd "$tmpbuild"
 		mv -v ./extra/mesa/* ./extra/mesa/.* ./
 		;;
 	*)
@@ -72,5 +75,5 @@ elif [ "$ARCH" = 'aarch64' ]; then
 fi
 
 cd ..
-rm -rf ./mesa
+rm -rf "$tmpbuild"
 echo "All done!"

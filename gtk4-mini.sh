@@ -3,11 +3,14 @@
 set -ex
 
 ARCH="$(uname -m)"
+tmpbuild="$PWD"/tmpbuild
+_cleanup() { rm -rf "$tmpbuild"; }
+trap _cleanup INT TERM EXIT
 
 sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/gtk4.git gtk4
-cd ./gtk4
+git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/gtk4.git "$tmpbuild"
+cd "$tmpbuild"
 
 case "$ARCH" in
 	x86_64)
@@ -41,5 +44,5 @@ ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.* ./*-demos-*.pkg.tar.*
 mv ./gtk4-*.pkg.tar."$EXT" ../gtk4-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
-rm -rf ./gtk
+rm -rf "$tmpbuild"
 echo "All done!"
