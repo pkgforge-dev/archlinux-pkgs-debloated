@@ -50,6 +50,7 @@ echo "UPSTREAM version: $UPSTREAM_VERSION"
 if [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
 	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
 	>&2 echo "----------------------------------------------------------------"
+	:> ~/OPERATION_ABORTED
 	exit 0
 fi
 echo "Versions match, building package..."
