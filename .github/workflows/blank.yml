@@ -7,7 +7,11 @@ on:
   schedule:
     - cron: "0 7 1/12 * *"
   workflow_dispatch: {}
-
+  inputs:
+    FORCE_BUILD:
+      description: 'Set to 1 to force a build'
+      required: false
+      default: '0'
 jobs:
   build:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
@@ -142,7 +146,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sccache-${{ matrix.script }}-${{ matrix.arch }}-
             
-      - name: build
+      - name: prepare container
         run: |
           sed -i 's/DownloadUser/#DownloadUser/g' /etc/pacman.conf
           pacman -Syu --noconfirm \
@@ -182,6 +186,15 @@ jobs:
           else
             export CMAKE_C_COMPILER_LAUNCHER=sccache
             export CMAKE_CXX_COMPILER_LAUNCHER=sccache
+          fi
+
+      - name: build package
+        env:
+          FORCE_BUILD: ${{ github.event.inputs.FORCE_BUILD }}
+        run: |
+          if [ "$FORCE_BUILD" = "1" ]; then
+            echo "Forcing build!" 
+            echo "Packages will be built and released regardless of version mismatch"
           fi
 
           COUNT=0
