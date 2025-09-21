@@ -212,6 +212,9 @@ jobs:
             sccache --show-stats
           fi
 
+          if [ -f ~/OPERATION_ABORTED ]; then
+            exit 0
+          fi
           mkdir ./dist
           sha256sum ./*.pkg.tar.*
           mv ./*.pkg.tar.* ./dist
