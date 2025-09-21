@@ -66,7 +66,7 @@ UPSTREAM_VERSION=$(pacman -Ss '^mesa$' | awk '{print $2; exit}' | cut -d- -f1)
 echo "----------------------------------------------------------------"
 echo "PKGBUILD version: $CURRENT_VERSION"
 echo "UPSTREAM version: $UPSTREAM_VERSION"
-if [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
+if [ "$FORCE_BUILD" != 1 ] && [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
 	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
 	>&2 echo "----------------------------------------------------------------"
 	:> ~/OPERATION_ABORTED
