@@ -241,13 +241,13 @@ jobs:
           merge-multiple: true
 
       - name: release
-        uses: marvinpinto/action-automatic-releases@v1.2.1
+        uses: softprops/action-gh-release@v2.3.3
         with:
-          title: Continuous build
-          automatic_release_tag: continuous
+          name: "Continuous build"
+          tag_name: continuous
           prerelease: false
-          draft: false
+          make_latest: true
+          target_commitish: ${{ github.sha }}
           files: |
             *.pkg.tar.zst
             *.pkg.tar.xz
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
