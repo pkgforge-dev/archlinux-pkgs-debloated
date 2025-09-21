@@ -6,12 +6,12 @@ concurrency:
 on:
   schedule:
     - cron: "0 7 1/12 * *"
-  workflow_dispatch: {}
-  inputs:
-    FORCE_BUILD:
-      description: 'Set to 1 to force a build'
-      required: false
-      default: '0'
+  workflow_dispatch:
+    inputs:
+      FORCE_BUILD:
+        description: 'Set to 1 to force a build'
+        required: false
+        default: '0'
 jobs:
   build:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
