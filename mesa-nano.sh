@@ -27,8 +27,8 @@ case "$ARCH" in
 	aarch64)
 		EXT=xz
 		git clone https://github.com/archlinuxarm/PKGBUILDs "$tmpbuild"
-		git reset --hard c1a50f9d625988d6a98c6fcadeb0e5dc2697a09d
 		cd "$tmpbuild"
+		git reset --hard c1a50f9d625988d6a98c6fcadeb0e5dc2697a09d
 		mv -v ./extra/mesa/* ./extra/mesa/.* ./
 		;;
 	*)
