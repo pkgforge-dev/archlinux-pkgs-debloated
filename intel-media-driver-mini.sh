@@ -33,7 +33,7 @@ cat ./PKGBUILD
 
 # Do not build if version does not match with upstream
 CURRENT_VERSION=$(awk -F'=' '/pkgver=/{print $2}' ./PKGBUILD)
-UPSTREAM_VERSION=$(pacman -Ss '^intel-media-driver$' | awk '{print $2; exit}' | cut -d- -f1)
+UPSTREAM_VERSION=$(pacman -Ss '^intel-media-driver$' | awk '{print $2; exit}' | cut -d- -f1 | sed 's/^[0-9]\+://')
 echo "----------------------------------------------------------------"
 echo "PKGBUILD version: $CURRENT_VERSION"
 echo "UPSTREAM version: $UPSTREAM_VERSION"
