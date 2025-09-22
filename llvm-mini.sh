@@ -42,6 +42,22 @@ sed -i \
 sed -i -e 's|LD_LIBRARY_PATH|#LD_LIBRARY_PATH|' ./PKGBUILD
 
 cat ./PKGBUILD
+
+# Do not build if version does not match with upstream
+CURRENT_VERSION=$(awk -F'=' '/pkgver=/{print $2; exit}' ./PKGBUILD)
+UPSTREAM_VERSION=$(pacman -Ss '^llvm-libs$' | awk '{print $2; exit}' | cut -d- -f1 | sed 's/^[0-9]\+://')
+echo "----------------------------------------------------------------"
+echo "PKGBUILD version: $CURRENT_VERSION"
+echo "UPSTREAM version: $UPSTREAM_VERSION"
+if [ "$FORCE_BUILD" != 1 ] && [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
+	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
+	>&2 echo "----------------------------------------------------------------"
+	:> ~/OPERATION_ABORTED
+	exit 0
+fi
+echo "Versions match, building package..."
+echo "----------------------------------------------------------------"
+
 makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
