@@ -2,6 +2,9 @@
 
 set -ex
 
+:> ~/OPERATION_ABORTED
+exit 0
+
 ARCH="$(uname -m)"
 tmpbuild="$PWD"/tmpbuild
 _cleanup() { rm -rf "$tmpbuild"; }
