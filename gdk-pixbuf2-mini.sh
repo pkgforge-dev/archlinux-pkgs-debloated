@@ -62,7 +62,7 @@ makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.* ./*-demos-*.pkg.tar.*
-mv ./gdk-pixbuf2-mini-*.pkg.tar."$EXT" ../gdk-pixbuf2-mini-mini-"$ARCH".pkg.tar."$EXT"
+mv ./gdk-pixbuf2-*.pkg.tar."$EXT" ../gdk-pixbuf2-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
 rm -rf "$tmpbuild"
 echo "All done!"
