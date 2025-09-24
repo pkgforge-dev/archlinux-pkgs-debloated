@@ -20,6 +20,8 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 * `opus-mini` I have no idea why Archlinux makes this lib 5 MiB when both ubuntu and alpine make it <500 KiB
 
+* `gdk-pixbuf2-mini` This builds it without the glycin dependency, which removes 20 MiB of bloat. (glycin is also super buggy and depends on `bwrap` which is problematic for running appimages in very old kernels)
+
 # Projects using these packages
 
 * [Anylinux-AppImages](https://github.com/pkgforge-dev/Anylinux-AppImages) - [ghostty](https://github.com/pkgforge-dev/ghostty-appimage), [citron](https://github.com/pkgforge-dev/Citron-appimage) and many more
