@@ -34,6 +34,7 @@ sed -i \
 	-e 's/glycin$/libjpeg-turbo libpng libtiff librsvg/' \
 	-e 's/glycin=enabled/glycin=disabled/'               \
 	-e 's/jpeg=disabled/jpeg=enabled/'                   \
+	-e 's/png=disabled/png=enabled/'                     \
 	-e 's/others=disabled/others=enabled/'               \
 	-e 's/tiff=disabled/tiff=enabled/'                   \
 	./PKGBUILD
@@ -52,8 +53,8 @@ echo "UPSTREAM version: $UPSTREAM_VERSION"
 if [ "$FORCE_BUILD" != 1 ] && [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
 	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
 	>&2 echo "----------------------------------------------------------------"
-	:> ~/OPERATION_ABORTED
-	exit 0
+	#:> ~/OPERATION_ABORTED
+	#exit 0
 fi
 echo "Versions match, building package..."
 echo "----------------------------------------------------------------"
