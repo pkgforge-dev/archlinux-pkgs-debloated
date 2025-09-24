@@ -1,7 +1,5 @@
 #!/bin/sh
 
-#!/bin/sh
-
 set -ex
 
 ARCH="$(uname -m)"
@@ -33,10 +31,12 @@ sed -i -e 's|-g1|-g0|' ./PKGBUILD
 sed -i \
 	-e 's/glycin$/libjpeg-turbo libpng libtiff librsvg/' \
 	-e 's/glycin=enabled/glycin=disabled/'               \
-	-e 's/jpeg=disabled/jpeg=enabled/'                   \
-	-e 's/png=disabled/png=enabled/'                     \
+	-e '/gif=.*/d'                                       \
+	-e '/jpeg=.*/d'                                      \
+	-e '/png=.*/d'                                       \
+	-e '/tiff=.*/d'                                      \
+	-e '/thumbnailer/d'                                  \
 	-e 's/others=disabled/others=enabled/'               \
-	-e 's/tiff=disabled/tiff=enabled/'                   \
 	./PKGBUILD
 
 cat ./PKGBUILD
