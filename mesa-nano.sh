@@ -61,8 +61,10 @@ sed -i \
 cat ./PKGBUILD
 
 # Do not build if version does not match with upstream
-CURRENT_VERSION=$(awk -F'=' '/pkgver=/{print $2; exit}' ./PKGBUILD)
-UPSTREAM_VERSION=$(pacman -Ss '^mesa$' | awk '{print $2; exit}' | cut -d- -f1 | sed 's/^[0-9]\+://')
+pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' ./PKGBUILD)
+pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' ./PKGBUILD)
+CURRENT_VERSION="$pkgver"-"$pkgrel"
+UPSTREAM_VERSION=$(pacman -Ss '^mesa$' | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 echo "----------------------------------------------------------------"
 echo "PKGBUILD version: $CURRENT_VERSION"
 echo "UPSTREAM version: $UPSTREAM_VERSION"
@@ -74,7 +76,6 @@ if [ "$FORCE_BUILD" != 1 ] && [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; the
 fi
 echo "Versions match, building package..."
 echo "----------------------------------------------------------------"
-
 makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
