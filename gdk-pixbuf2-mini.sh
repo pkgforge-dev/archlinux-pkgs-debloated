@@ -31,11 +31,11 @@ sed -i -e 's|-g1|-g0|' ./PKGBUILD
 
 # debloat package, remove vulkan renderer, remove linking to broadway and cloudproviders
 sed -i \
-	-e 's/glycin/libjpeg-turbo libpng libtiff librsvg/' \
-	-e 's/glycin=enabled/glycin=disabled/'              \
-	-e 's/jpeg=disabled/jpeg=enabled/'                  \
-	-e 's/others=disabled/others=enabled/'              \
-	-e 's/tiff=disabled/tiff=enabled/'                  \
+	-e 's/glycin$/libjpeg-turbo libpng libtiff librsvg/' \
+	-e 's/glycin=enabled/glycin=disabled/'               \
+	-e 's/jpeg=disabled/jpeg=enabled/'                   \
+	-e 's/others=disabled/others=enabled/'               \
+	-e 's/tiff=disabled/tiff=enabled/'                   \
 	./PKGBUILD
 
 cat ./PKGBUILD
