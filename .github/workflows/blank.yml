@@ -12,6 +12,10 @@ on:
         description: 'Set to 1 to force a build'
         required: false
         default: '0'
+      ONE_PACKAGE:
+        description: 'Set to the name of only one package to be built'
+        required: false
+        default: ''
 jobs:
   build:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
@@ -199,6 +203,7 @@ jobs:
       - name: build package
         env:
           FORCE_BUILD: ${{ github.event.inputs.FORCE_BUILD }}
+          ONE_PACKAGE:  ${{ github.event.inputs.ONE_PACKAGE }}
         run: |
           if [ "$FORCE_BUILD" = "1" ]; then
             echo "Forcing build!" 
