@@ -33,7 +33,9 @@ sed -i \
 	-e '/broadway/d'        \
 	-e '/sysprof=/d'        \
 	-e '/cloudproviders=/d' \
-	-e 's/-D colord=enabled/-D colord=enabled -D media-gstreamer=disabled -D vulkan=disabled -D build-testsuite=false/' \
+	-e '/libcups/d'         \
+	-e '/libcolord/d'       \
+	-e 's/-D colord=enabled/-D colord=disabled -D print-cups=disabled -D media-gstreamer=disabled -D vulkan=disabled -D build-testsuite=false/' \
 	./PKGBUILD
 
 cat ./PKGBUILD
