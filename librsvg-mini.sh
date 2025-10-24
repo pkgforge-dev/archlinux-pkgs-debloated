@@ -46,15 +46,15 @@ cat ./PKGBUILD
 pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' ./PKGBUILD)
 pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' ./PKGBUILD)
 CURRENT_VERSION="$pkgver"-"$pkgrel"
-UPSTREAM_VERSION=$(pacman -Ss '^gdk-pixbuf2$' | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
+UPSTREAM_VERSION=$(pacman -Ss '^librsvg$' | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 echo "----------------------------------------------------------------"
 echo "PKGBUILD version: $CURRENT_VERSION"
 echo "UPSTREAM version: $UPSTREAM_VERSION"
 if [ "$FORCE_BUILD" != 1 ] && [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
 	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
 	>&2 echo "----------------------------------------------------------------"
-	#:> ~/OPERATION_ABORTED
-	#exit 0
+	:> ~/OPERATION_ABORTED
+	exit 0
 fi
 echo "Versions match, building package..."
 echo "----------------------------------------------------------------"
