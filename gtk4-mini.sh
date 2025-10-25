@@ -58,7 +58,7 @@ else
 fi
 
 ls -la
-rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
+rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.* ./*-demos-*.pkg.tar.*
 mv -v ./"$PACKAGE"-*.pkg.tar."$EXT" ../"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
 rm -rf "$tmpbuild"
