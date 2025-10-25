@@ -11,8 +11,9 @@ UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0
 echo "----------------------------------------------------------------"
 echo "PKGBUILD version: $CURRENT_VERSION"
 echo "UPSTREAM version: $UPSTREAM_VERSION"
-if [ "$FORCE_BUILD" = 1 ]
+if [ "$FORCE_BUILD" = 1 ]; then
 	echo "FORCE_BUILD is set to 1. BUILDING PACKAGE REGARDLESS!"
+	echo "----------------------------------------------------------------"
 elif [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
 	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
 	>&2 echo "----------------------------------------------------------------"
