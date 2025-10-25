@@ -6,12 +6,14 @@ set -ex
 exit 0
 
 ARCH="$(uname -m)"
+PATH="$PWD/bin:$PATH"
 tmpbuild="$PWD"/tmpbuild
 _cleanup() { rm -rf "$tmpbuild"; }
 trap _cleanup INT TERM EXIT
 
 PACKAGE="${0##*/}"
-PACKAGE="${PACKAGE%.sh}"
+PACKAGE="${PACKAGE%-mini.sh}"
+PACKAGE="${PACKAGE%-nano.sh}"
 case "$ONE_PACKAGE" in
 	''|"$PACKAGE") true;;
 	*) :> ~/OPERATION_ABORTED; exit 0;;
@@ -50,7 +52,7 @@ makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
-mv -v ./mangohud-*.pkg.tar."$EXT" ../mangohud-mini-"$ARCH".pkg.tar."$EXT"
+mv -v ./"$PACKAGE"-*.pkg.tar."$EXT" ../"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
 rm -rf "$tmpbuild"
 echo "All done!"

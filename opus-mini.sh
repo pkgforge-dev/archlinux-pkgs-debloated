@@ -3,18 +3,20 @@
 set -ex
 
 ARCH="$(uname -m)"
+PATH="$PWD/bin:$PATH"
 tmpbuild="$PWD"/tmpbuild
 _cleanup() { rm -rf "$tmpbuild"; }
 trap _cleanup INT TERM EXIT
 
 PACKAGE="${0##*/}"
-PACKAGE="${PACKAGE%.sh}"
+PACKAGE="${PACKAGE%-mini.sh}"
+PACKAGE="${PACKAGE%-nano.sh}"
 case "$ONE_PACKAGE" in
 	''|"$PACKAGE") true;;
 	*) :> ~/OPERATION_ABORTED; exit 0;;
 esac
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/opus.git "$tmpbuild"
+git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$tmpbuild"
 cd "$tmpbuild"
 
 case "$ARCH" in
@@ -46,27 +48,17 @@ sed -i \
 cat ./PKGBUILD
 
 # Do not build if version does not match with upstream
-CURRENT_VERSION=$(awk -F'=' '/pkgver=/{print $2; exit}' ./PKGBUILD)
-UPSTREAM_VERSION=$(pacman -Ss '^opus$' | awk '{print $2; exit}' | cut -d- -f1 | sed 's/^[0-9]\+://')
-echo "----------------------------------------------------------------"
-echo "PKGBUILD version: $CURRENT_VERSION"
-echo "UPSTREAM version: $UPSTREAM_VERSION"
-if [ "$FORCE_BUILD" != 1 ] && [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
-	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
-	>&2 echo "----------------------------------------------------------------"
-	:> ~/OPERATION_ABORTED
+if ! check-upstream-version; then
 	exit 0
+else
+	makepkg -fs --noconfirm --skippgpcheck
 fi
-echo "Versions match, building package..."
-echo "----------------------------------------------------------------"
-
-makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
-rm -fv *-docs-*.pkg.tar.* *-debug-*.pkg.tar.*
-mv ./opus-*.pkg.tar."$EXT" ../opus-mini-"$ARCH".pkg.tar."$EXT"
+rm -fv ./*-docs-*.pkg.tar.* *-debug-*.pkg.tar.*
+mv -v ./"$PACKAGE"-*.pkg.tar."$EXT" ../"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
 rm -rf "$tmpbuild"
 # keep older name to not break existing CIs
-cp -v ./opus-mini-"$ARCH".pkg.tar."$EXT" ./opus-nano-"$ARCH".pkg.tar."$EXT"
+cp -v ./"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT" ./"$PACKAGE"-nano-"$ARCH".pkg.tar."$EXT"
 echo "All done!"

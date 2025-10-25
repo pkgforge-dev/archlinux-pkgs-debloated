@@ -3,18 +3,20 @@
 set -ex
 
 ARCH="$(uname -m)"
+PATH="$PWD/bin:$PATH"
 tmpbuild="$PWD"/tmpbuild
 _cleanup() { rm -rf "$tmpbuild"; }
 trap _cleanup INT TERM EXIT
 
 PACKAGE="${0##*/}"
-PACKAGE="${PACKAGE%.sh}"
+PACKAGE="${PACKAGE%-mini.sh}"
+PACKAGE="${PACKAGE%-nano.sh}"
 case "$ONE_PACKAGE" in
 	''|"$PACKAGE") true;;
 	*) :> ~/OPERATION_ABORTED; exit 0;;
 esac
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/gtk4.git "$tmpbuild"
+git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$tmpbuild"
 cd "$tmpbuild"
 
 case "$ARCH" in
@@ -47,25 +49,15 @@ sed -i \
 cat ./PKGBUILD
 
 # Do not build if version does not match with upstream
-CURRENT_VERSION=$(awk -F'=' '/pkgver=/{print $2; exit}' ./PKGBUILD)
-UPSTREAM_VERSION=$(pacman -Ss '^gtk4$' | awk '{print $2; exit}' | cut -d- -f1 | sed 's/^[0-9]\+://')
-echo "----------------------------------------------------------------"
-echo "PKGBUILD version: $CURRENT_VERSION"
-echo "UPSTREAM version: $UPSTREAM_VERSION"
-if [ "$FORCE_BUILD" != 1 ] && [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
-	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
-	>&2 echo "----------------------------------------------------------------"
-	:> ~/OPERATION_ABORTED
+if ! check-upstream-version; then
 	exit 0
+else
+	makepkg -fs --noconfirm --skippgpcheck
 fi
-echo "Versions match, building package..."
-echo "----------------------------------------------------------------"
-
-makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
-rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.* ./*-demos-*.pkg.tar.*
-mv ./gtk4-*.pkg.tar."$EXT" ../gtk4-mini-"$ARCH".pkg.tar."$EXT"
+rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
+mv -v ./"$PACKAGE"-*.pkg.tar."$EXT" ../"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
 rm -rf "$tmpbuild"
 echo "All done!"

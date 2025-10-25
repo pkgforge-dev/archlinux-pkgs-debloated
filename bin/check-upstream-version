@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# This script compares the version of the PKGBUILD with the upstream version
+# This is to avoid pushing packages that are too new causing partial updates as result
+
+pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' ./PKGBUILD)
+pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' ./PKGBUILD)
+CURRENT_VERSION="$pkgver"-"$pkgrel"
+UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
+
+echo "----------------------------------------------------------------"
+echo "PKGBUILD version: $CURRENT_VERSION"
+echo "UPSTREAM version: $UPSTREAM_VERSION"
+if [ "$FORCE_BUILD" = 1 ]
+	echo "FORCE_BUILD is set to 1. BUILDING PACKAGE REGARDLESS!"
+elif [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
+	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
+	>&2 echo "----------------------------------------------------------------"
+	:> ~/OPERATION_ABORTED
+	exit 1
+else
+	echo "Versions match, building package..."
+	echo "----------------------------------------------------------------"
+fi
+
