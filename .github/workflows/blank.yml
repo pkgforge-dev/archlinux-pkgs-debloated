@@ -168,36 +168,7 @@ jobs:
             
       - name: prepare container
         run: |
-          sed -i 's/DownloadUser/#DownloadUser/g' /etc/pacman.conf
-          pacman -Syu --noconfirm \
-            base-devel \
-            ccache     \
-            clang      \
-            cmake      \
-            curl       \
-            git        \
-            ninja      \
-            sccache    \
-            wget
-
-          export PATH="$PWD/bin:$PATH:/usr/bin/core_perl"
-          chmod +x "$PWD"/bin/*
-
-          sudo sed -i \
-            -e 's|DEBUG_CFLAGS="-g"|DEBUG_CFLAGS="-g0"|' \
-            -e 's|-fno-omit-frame-pointer|-fomit-frame-pointer|' \
-            -e 's|-mno-omit-leaf-frame-pointer||' \
-            -e 's|-Wp,-D_FORTIFY_SOURCE=3||' \
-            -e 's|-fstack-clash-protection||' \
-            -e 's|MAKEFLAGS=.*|MAKEFLAGS="-j$(nproc)"|' \
-            -e 's|!ccache|ccache|' \
-            -e 's|#MAKEFLAGS|MAKEFLAGS|' /etc/makepkg.conf
-          cat /etc/makepkg.conf
-
-          echo "Hacking makepkg to allow building as root in the container..."
-          sudo sed -i 's|EUID == 0|EUID == 69|g' /usr/bin/makepkg
-          mkdir -p /usr/local/bin
-          cp /usr/bin/makepkg /usr/local/bin
+          . ./bin/prepare-build
 
           export CC=gcc
           export CXX=g++
