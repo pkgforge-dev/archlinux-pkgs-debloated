@@ -3,7 +3,6 @@
 set -ex
 
 ARCH="$(uname -m)"
-PATH="$PWD/bin:$PATH"
 tmpbuild="$PWD"/tmpbuild
 _cleanup() { rm -rf "$tmpbuild"; }
 trap _cleanup INT TERM EXIT
