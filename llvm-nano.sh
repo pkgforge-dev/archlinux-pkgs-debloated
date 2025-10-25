@@ -66,7 +66,7 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
-mv -v ./"$PACKAGE"-*.pkg.tar."$EXT" ../"$PACKAGE"-nano-"$ARCH".pkg.tar."$EXT"
+mv -v ./"$PACKAGE"-libs-*.pkg.tar."$EXT" ../"$PACKAGE"-libs-nano-"$ARCH".pkg.tar."$EXT"
 cd ..
 rm -rf "$tmpbuild"
 echo "All done!"
