@@ -14,6 +14,8 @@ trap _cleanup INT TERM EXIT
 PACKAGE="${0##*/}"
 PACKAGE="${PACKAGE%-mini.sh}"
 PACKAGE="${PACKAGE%-nano.sh}"
+export PACKAGE
+
 case "$ONE_PACKAGE" in
 	''|"$PACKAGE") true;;
 	*) :> ~/OPERATION_ABORTED; exit 0;;
