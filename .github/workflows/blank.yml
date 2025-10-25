@@ -180,7 +180,8 @@ jobs:
             sccache    \
             wget
 
-          export PATH="$PATH:/usr/bin/core_perl"
+          export PATH="$PWD/bin:$PATH:/usr/bin/core_perl"
+          chmod +x "$PWD"/bin/*
 
           sudo sed -i \
             -e 's|DEBUG_CFLAGS="-g"|DEBUG_CFLAGS="-g0"|' \
