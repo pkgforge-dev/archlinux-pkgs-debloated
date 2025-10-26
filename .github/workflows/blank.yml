@@ -167,17 +167,14 @@ jobs:
             ${{ runner.os }}-sccache-${{ matrix.script }}-${{ matrix.arch }}-
             
       - name: prepare container
-        run: |
-          export PATH="$PWD/bin:$PATH:/usr/bin/core_perl"
-          chmod +x "$PWD"/bin/* "$PWD"/*.sh
-          prepare-build
+        run: /bin/sh -c ./bin/prepare-build
 
       - name: build package
         env:
           FORCE_BUILD: ${{ github.event.inputs.FORCE_BUILD }}
           ONE_PACKAGE:  ${{ github.event.inputs.ONE_PACKAGE }}
         run: |
-          export PATH="$PWD/bin:$PATH:/usr/bin/core_perl"
+          export PATH="$PWD:$PWD/bin:$PATH:/usr/bin/core_perl"
           chmod +x "$PWD"/bin/* "$PWD"/*.sh
           build-package ${{ matrix.script }}.sh
 
