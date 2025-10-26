@@ -3,12 +3,13 @@
 export CC=gcc
 export CXX=g++
 
-PACKAGE="${1##*/}"
+SCRIPT="$1"
+PACKAGE="${SCRIPT##*/}"
 PACKAGE="${PACKAGE%-mini.sh}"
 PACKAGE="${PACKAGE%-nano.sh}"
 export PACKAGE
 
-if [ "$1" != 'qt6-base-mini' ]; then
+if [ "$PACKAGE" != 'qt6-base' ]; then
 	export CMAKE_C_COMPILER_LAUNCHER=ccache
 	export CMAKE_CXX_COMPILER_LAUNCHER=ccache
 else
@@ -31,7 +32,7 @@ fi
 
 COUNT=0
 while :; do
-	if "$1"; then
+	if "$SCRIPT"; then
 		if [ -f ~/OPERATION_ABORTED ]; then
 			exit 0
 		fi
@@ -53,7 +54,7 @@ while :; do
 	fi
 done
 
-if [ "$1" != 'qt6-base-mini' ]; then
+if [ "$PACKAGE" != 'qt6-base' ]; then
 	ccache -s -v
 else
 	sccache --show-stats
