@@ -11,7 +11,6 @@ else
 	export CMAKE_CXX_COMPILER_LAUNCHER=sccache
 fi
 
-
 if [ "$FORCE_BUILD" = "1" ]; then
 	echo "Forcing build!" 
 	echo "Packages will be built and released regardless of version mismatch"
@@ -20,7 +19,7 @@ fi
 COUNT=0
 chmod +x ./*.sh
 while :; do
-	if $1; then
+	if "$1"; then
 		if [ -f ~/OPERATION_ABORTED ]; then
 			exit 0
 		fi
