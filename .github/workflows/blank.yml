@@ -5,17 +5,17 @@ concurrency:
 
 on:
   schedule:
-    - cron: "0 7 1/12 * *"
+    - cron: "0 7 1/10 * *"
   workflow_dispatch:
     inputs:
-      FORCE_BUILD:
-        description: 'Set to 1 to force a build'
-        required: false
-        default: '0'
       ONE_PACKAGE:
-        description: 'Set to the name of only one package to be built'
+        description: 'Set to the name of only one package to be built, package name only without -nano or -mini'
         required: false
         default: ''
+      FORCE_BUILD:
+        description: 'Set to 1 to force building even if version does not match with upstream'
+        required: false
+        default: '0'
 jobs:
   build:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
@@ -167,91 +167,13 @@ jobs:
             ${{ runner.os }}-sccache-${{ matrix.script }}-${{ matrix.arch }}-
             
       - name: prepare container
-        run: |
-          sed -i 's/DownloadUser/#DownloadUser/g' /etc/pacman.conf
-          pacman -Syu --noconfirm \
-            base-devel \
-            ccache     \
-            clang      \
-            cmake      \
-            curl       \
-            git        \
-            ninja      \
-            sccache    \
-            wget
-
-          export PATH="$PATH:/usr/bin/core_perl"
-
-          sudo sed -i \
-            -e 's|DEBUG_CFLAGS="-g"|DEBUG_CFLAGS="-g0"|' \
-            -e 's|-fno-omit-frame-pointer|-fomit-frame-pointer|' \
-            -e 's|-mno-omit-leaf-frame-pointer||' \
-            -e 's|-Wp,-D_FORTIFY_SOURCE=3||' \
-            -e 's|-fstack-clash-protection||' \
-            -e 's|MAKEFLAGS=.*|MAKEFLAGS="-j$(nproc)"|' \
-            -e 's|!ccache|ccache|' \
-            -e 's|#MAKEFLAGS|MAKEFLAGS|' /etc/makepkg.conf
-          cat /etc/makepkg.conf
-
-          echo "Hacking makepkg to allow building as root in the container..."
-          sudo sed -i 's|EUID == 0|EUID == 69|g' /usr/bin/makepkg
-          mkdir -p /usr/local/bin
-          cp /usr/bin/makepkg /usr/local/bin
-
-          export CC=gcc
-          export CXX=g++
-          if [ "${{ matrix.script }}" != 'qt6-base-mini' ]; then
-            export CMAKE_C_COMPILER_LAUNCHER=ccache
-            export CMAKE_CXX_COMPILER_LAUNCHER=ccache
-          else
-            export CMAKE_C_COMPILER_LAUNCHER=sccache
-            export CMAKE_CXX_COMPILER_LAUNCHER=sccache
-          fi
+        run: /bin/sh ./bin/prepare-build
 
       - name: build package
         env:
           FORCE_BUILD: ${{ github.event.inputs.FORCE_BUILD }}
           ONE_PACKAGE:  ${{ github.event.inputs.ONE_PACKAGE }}
-        run: |
-          if [ "$FORCE_BUILD" = "1" ]; then
-            echo "Forcing build!" 
-            echo "Packages will be built and released regardless of version mismatch"
-          fi
-
-          COUNT=0
-          chmod +x ./*.sh
-          while :; do
-            if ./${{ matrix.script }}.sh; then
-              if [ -f ~/OPERATION_ABORTED ]; then
-                exit 0
-              fi
-              >&2 echo "----------------------------------------"
-              >&2 echo "Package built successfully!"
-              >&2 echo "----------------------------------------"
-              break
-            else
-              >&2 echo "----------------------------------------"
-              >&2 echo "Failed to build package, trying again..."
-              >&2 echo "----------------------------------------"
-              COUNT=$(( COUNT + 1))
-            fi
-            if [ "$COUNT" -ge 3 ]; then
-              >&2 echo "----------------------------------------"
-              >&2 echo "Failed to build package 3 times"
-              >&2 echo "----------------------------------------"
-              exit 1
-            fi
-          done
-          
-          if [ "${{ matrix.script }}" != 'qt6-base-mini' ]; then
-            ccache -s -v
-          else
-            sccache --show-stats
-          fi
-
-          mkdir ./dist
-          sha256sum ./*.pkg.tar.*
-          mv ./*.pkg.tar.* ./dist
+        run: /bin/sh ./bin/build-package ${{ matrix.script }}.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

@@ -7,16 +7,9 @@ tmpbuild="$PWD"/tmpbuild
 _cleanup() { rm -rf "$tmpbuild"; }
 trap _cleanup INT TERM EXIT
 
-PACKAGE="${0##*/}"
-PACKAGE="${PACKAGE%.sh}"
-case "$ONE_PACKAGE" in
-	''|"$PACKAGE") true;;
-	*) :> ~/OPERATION_ABORTED; exit 0;;
-esac
-
 sed -i -e 's|-O2|-Oz|' /etc/makepkg.conf
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/llvm "$tmpbuild"
+git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$tmpbuild"
 cd "$tmpbuild"
 
 case "$ARCH" in
@@ -51,24 +44,15 @@ sed -i -e 's|LD_LIBRARY_PATH|#LD_LIBRARY_PATH|' ./PKGBUILD
 cat ./PKGBUILD
 
 # Do not build if version does not match with upstream
-CURRENT_VERSION=$(awk -F'=' '/pkgver=/{print $2; exit}' ./PKGBUILD)
-UPSTREAM_VERSION=$(pacman -Ss '^llvm-libs$' | awk '{print $2; exit}' | cut -d- -f1 | sed 's/^[0-9]\+://')
-echo "----------------------------------------------------------------"
-echo "PKGBUILD version: $CURRENT_VERSION"
-echo "UPSTREAM version: $UPSTREAM_VERSION"
-if [ "$FORCE_BUILD" != 1 ] && [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
-	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
-	>&2 echo "----------------------------------------------------------------"
-	:> ~/OPERATION_ABORTED
-	exit 0
+if check-upstream-version; then
+	makepkg -fs --noconfirm --skippgpcheck
+else
+		exit 0
 fi
-echo "Versions match, building package..."
-echo "----------------------------------------------------------------"
-
-makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
-mv ./llvm-libs-*.pkg.tar."$EXT" ../llvm-libs-mini-"$ARCH".pkg.tar."$EXT"
+rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
+mv -v ./"$PACKAGE"-libs-*.pkg.tar."$EXT" ../"$PACKAGE"-libs-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
 rm -rf "$tmpbuild"
 echo "All done!"
