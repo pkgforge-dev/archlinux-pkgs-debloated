@@ -46,7 +46,7 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
-mv -v ./libxml2-*.pkg.tar."$EXT" ../libxml2-mini-"$ARCH".pkg.tar."$EXT"
+mv -v ./"$PACKAGE"-*.pkg.tar."$EXT" ../"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT"
 cd ..
 rm -rf "$tmpbuild"
 # keep older name to not break existing CIs
