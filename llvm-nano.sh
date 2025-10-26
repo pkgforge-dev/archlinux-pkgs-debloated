@@ -57,10 +57,10 @@ sed -i -e 's|LD_LIBRARY_PATH|#LD_LIBRARY_PATH|' ./PKGBUILD
 cat ./PKGBUILD
 
 # Do not build if version does not match with upstream
-if ! check-upstream-version; then
-	exit 0
-else
+if check-upstream-version; then
 	makepkg -fs --noconfirm --skippgpcheck
+else
+		exit 0
 fi
 
 ls -la
