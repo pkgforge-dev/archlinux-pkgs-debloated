@@ -17,7 +17,6 @@ if [ "$FORCE_BUILD" = "1" ]; then
 fi
 
 COUNT=0
-chmod +x ./*.sh
 while :; do
 	if "$1"; then
 		if [ -f ~/OPERATION_ABORTED ]; then
