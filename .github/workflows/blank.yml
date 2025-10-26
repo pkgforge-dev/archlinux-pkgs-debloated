@@ -170,7 +170,7 @@ jobs:
         run: |
           export PATH="$PWD/bin:$PATH:/usr/bin/core_perl"
           chmod +x "$PWD"/bin/* "$PWD"/*.sh
-          ./bin/prepare-build
+          prepare-build
 
           export CC=gcc
           export CXX=g++
