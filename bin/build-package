@@ -1,0 +1,53 @@
+#!/bin/sh
+
+export CC=gcc
+export CXX=g++
+
+if [ "$1" != 'qt6-base-mini' ]; then
+	export CMAKE_C_COMPILER_LAUNCHER=ccache
+	export CMAKE_CXX_COMPILER_LAUNCHER=ccache
+else
+	export CMAKE_C_COMPILER_LAUNCHER=sccache
+	export CMAKE_CXX_COMPILER_LAUNCHER=sccache
+fi
+
+
+if [ "$FORCE_BUILD" = "1" ]; then
+	echo "Forcing build!" 
+	echo "Packages will be built and released regardless of version mismatch"
+fi
+
+COUNT=0
+chmod +x ./*.sh
+while :; do
+	if $1; then
+		if [ -f ~/OPERATION_ABORTED ]; then
+			exit 0
+		fi
+		>&2 echo "----------------------------------------"
+		>&2 echo "Package built successfully!"
+		>&2 echo "----------------------------------------"
+		break
+	else
+		>&2 echo "----------------------------------------"
+		>&2 echo "Failed to build package, trying again..."
+		>&2 echo "----------------------------------------"
+		COUNT=$(( COUNT + 1))
+	fi
+	if [ "$COUNT" -ge 3 ]; then
+		>&2 echo "----------------------------------------"
+		>&2 echo "Failed to build package 3 times"
+		>&2 echo "----------------------------------------"
+		exit 1
+	fi
+done
+
+if [ "$1" != 'qt6-base-mini' ]; then
+	ccache -s -v
+else
+	sccache --show-stats
+fi
+
+mkdir ./dist
+sha256sum ./*.pkg.tar.*
+mv ./*.pkg.tar.* ./dist
