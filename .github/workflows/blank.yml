@@ -192,6 +192,9 @@ jobs:
             echo "Packages will be built and released regardless of version mismatch"
           fi
 
+          export PATH="$PWD/bin:$PATH:/usr/bin/core_perl"
+          chmod +x "$PWD"/bin/* "$PWD"/*.sh
+
           COUNT=0
           chmod +x ./*.sh
           while :; do
