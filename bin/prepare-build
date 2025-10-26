@@ -1,8 +1,5 @@
 #!/bin/sh
 
-export PATH="$PWD/bin:$PATH:/usr/bin/core_perl"
-chmod +x "$PWD"/bin/*
-
 echo "Installing basic packages..."
 pacman -Syu --noconfirm \
 	base-devel \
