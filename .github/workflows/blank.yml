@@ -8,14 +8,14 @@ on:
     - cron: "0 7 1/10 * *"
   workflow_dispatch:
     inputs:
-      FORCE_BUILD:
-        description: 'Set to 1 to force a build'
-        required: false
-        default: '0'
       ONE_PACKAGE:
-        description: 'Set to the name of only one package to be built'
+        description: 'Set to the name of only one package to be built, package name only without -nano or -mini'
         required: false
         default: ''
+      FORCE_BUILD:
+        description: 'Set to 1 to force building even if version does not match with upstream'
+        required: false
+        default: '0'
 jobs:
   build:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
