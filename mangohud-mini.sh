@@ -54,7 +54,7 @@ cat ./PKGBUILD
 
 # Do not build if version does not match with upstream
 # Only do it for x86_64 because aarch64 has no mangohud package
-if [ "$ARCH" = 'aarch64'] || check-upstream-version; then
+if [ "$ARCH" = 'aarch64' ] || check-upstream-version; then
 	makepkg -fs --noconfirm --skippgpcheck
 else
 		exit 0
