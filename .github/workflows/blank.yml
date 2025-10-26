@@ -168,7 +168,9 @@ jobs:
             
       - name: prepare container
         run: |
-          . ./bin/prepare-build
+          export PATH="$PWD/bin:$PATH:/usr/bin/core_perl"
+          chmod +x "$PWD"/bin/* "$PWD"/*.sh
+          ./bin/prepare-build
 
           export CC=gcc
           export CXX=g++
