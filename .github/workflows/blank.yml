@@ -167,16 +167,13 @@ jobs:
             ${{ runner.os }}-sccache-${{ matrix.script }}-${{ matrix.arch }}-
             
       - name: prepare container
-        run: /bin/sh -c ./bin/prepare-build
+        run: /bin/sh ./bin/prepare-build
 
       - name: build package
         env:
           FORCE_BUILD: ${{ github.event.inputs.FORCE_BUILD }}
           ONE_PACKAGE:  ${{ github.event.inputs.ONE_PACKAGE }}
-        run: |
-          export PATH="$PWD:$PWD/bin:$PATH:/usr/bin/core_perl"
-          chmod +x "$PWD"/bin/* "$PWD"/*.sh
-          build-package ${{ matrix.script }}.sh
+        run: /bin/sh ./bin/build-package ${{ matrix.script }}.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
