@@ -3,6 +3,11 @@
 export CC=gcc
 export CXX=g++
 
+PACKAGE="${1##*/}"
+PACKAGE="${PACKAGE%-mini.sh}"
+PACKAGE="${PACKAGE%-nano.sh}"
+export PACKAGE
+
 if [ "$1" != 'qt6-base-mini' ]; then
 	export CMAKE_C_COMPILER_LAUNCHER=ccache
 	export CMAKE_CXX_COMPILER_LAUNCHER=ccache
@@ -15,8 +20,13 @@ export PATH="$PWD:$PWD/bin:$PATH:/usr/bin/core_perl"
 chmod +x "$PWD"/bin/* "$PWD"/*.sh
 
 if [ "$FORCE_BUILD" = "1" ]; then
-	echo "Forcing build!" 
+	echo "Forcing build!"
 	echo "Packages will be built and released regardless of version mismatch"
+fi
+
+if [ -n "$ONE_PACKAGE" ] && [ "$ONE_PACKAGE" != "$PACKAGE" ]; then
+	:> ~/OPERATION_ABORTED
+	exit 0
 fi
 
 COUNT=0

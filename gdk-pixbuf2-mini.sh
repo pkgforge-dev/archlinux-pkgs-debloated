@@ -7,16 +7,6 @@ tmpbuild="$PWD"/tmpbuild
 _cleanup() { rm -rf "$tmpbuild"; }
 trap _cleanup INT TERM EXIT
 
-PACKAGE="${0##*/}"
-PACKAGE="${PACKAGE%-mini.sh}"
-PACKAGE="${PACKAGE%-nano.sh}"
-export PACKAGE
-
-case "$ONE_PACKAGE" in
-	''|"$PACKAGE") true;;
-	*) :> ~/OPERATION_ABORTED; exit 0;;
-esac
-
 git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$tmpbuild"
 cd "$tmpbuild"
 
