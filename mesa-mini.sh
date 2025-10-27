@@ -1,17 +1,12 @@
 #!/bin/sh
 
-set -ex
-
-ARCH="$(uname -m)"
-tmpbuild="$PWD"/tmpbuild
-_cleanup() { rm -rf "$tmpbuild"; }
-trap _cleanup INT TERM EXIT
+set -e
 
 case "$ARCH" in
 	x86_64)
 		EXT=zst
-		git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$tmpbuild"
-		cd "$tmpbuild"
+		git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$BUILD_DIR"
+		cd "$BUILD_DIR"
 		# remove aarch64 drivers from x86_64
 		sed -i \
 			-e '/_pick vkfdreno/d'    \
@@ -24,8 +19,8 @@ case "$ARCH" in
 		;;
 	aarch64)
 		EXT=xz
-		git clone https://github.com/archlinuxarm/PKGBUILDs "$tmpbuild"
-		cd "$tmpbuild"
+		git clone https://github.com/archlinuxarm/PKGBUILDs "$BUILD_DIR"
+		cd "$BUILD_DIR"
 		mv -v ./extra/mesa/* ./extra/mesa/.* ./
 		;;
 	*)
@@ -62,7 +57,7 @@ cat ./PKGBUILD
 if check-upstream-version; then
 	makepkg -fs --noconfirm --skippgpcheck
 else
-		exit 0
+	exit 0
 fi
 
 ls -la
@@ -80,6 +75,4 @@ elif [ "$ARCH" = 'aarch64' ]; then
 	mv -v ./vulkan-asahi-*.pkg.tar."$EXT"     ../vulkan-asahi-mini-"$ARCH".pkg.tar."$EXT"
 fi
 
-cd ..
-rm -rf "$tmpbuild"
 echo "All done!"
