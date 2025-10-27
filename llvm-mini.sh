@@ -4,13 +4,8 @@ set -e
 
 sed -i -e 's|-O2|-Oz|' /etc/makepkg.conf
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$BUILD_DIR"
+get-pkgbuild
 cd "$BUILD_DIR"
-
-# change arch for aarch64 support
-sed -i -e "s|x86_64|$ARCH|" ./PKGBUILD
-# build without debug info
-sed -i -e 's|-g1|-g0|' ./PKGBUILD
 
 # debloat package, build with MinSizeRel
 sed -i \
@@ -19,12 +14,12 @@ sed -i \
 	-e 's|-DLLVM_ENABLE_CURL=ON|-DLLVM_ENABLE_CURL=OFF -DLLVM_ENABLE_UNWIND_TABLES=OFF|' \
 	-e 's|-DLLVM_ENABLE_SPHINX=ON|-DLLVM_ENABLE_SPHINX=OFF|' \
 	-e 's|rm -r|#rm -r|' \
-	./PKGBUILD
+	"$PKGBUILD"
 
 # disable tests (they take too long)
-sed -i -e 's|LD_LIBRARY_PATH|#LD_LIBRARY_PATH|' ./PKGBUILD
+sed -i -e 's|LD_LIBRARY_PATH|#LD_LIBRARY_PATH|' "$PKGBUILD"
 
-cat ./PKGBUILD
+cat "$PKGBUILD"
 
 # Do not build if version does not match with upstream
 if check-upstream-version; then

@@ -4,11 +4,11 @@ set -e
 
 sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
 
-case "$ARCH" in
-	x86_64)
-		git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$BUILD_DIR"
-		cd "$BUILD_DIR"
-		# remove aarch64 drivers from x86_64
+get-pkgbuild
+cd "$BUILD_DIR"
+
+# remove aarch64 drivers from x86_64
+if [ "$ARCH" = 'x86_64' ]; then
 		sed -i \
 			-e '/_pick vkfdreno/d'    \
 			-e '/_pick vkasahi/d'     \
@@ -16,18 +16,8 @@ case "$ARCH" in
 			-e 's/vulkan-asahi//'     \
 			-e 's/,asahi//g'          \
 			-e 's/,freedreno//g'      \
-			./PKGBUILD
-		;;
-	aarch64)
-		git clone https://github.com/archlinuxarm/PKGBUILDs "$BUILD_DIR"
-		cd "$BUILD_DIR"
-		mv -v ./extra/mesa/* ./extra/mesa/.* ./
-		;;
-esac
-# change arch for aarch64 support
-sed -i -e "s|x86_64|$ARCH|" ./PKGBUILD
-# build without debug info
-sed -i -e 's|-g1|-g0|' ./PKGBUILD
+			"$PKGBUILD"
+fi
 
 # debloat package, remove software rast, remove ancient drivers, build iwhtout linking to llvm
 sed -i \
@@ -45,9 +35,9 @@ sed -i \
 	-e 's/gallium-rusticl=true/gallium-rusticl=false/' \
 	-e 's/valgrind=enabled/valgrind=disabled/'         \
 	-e 's/-D video-codecs=all/-D video-codecs=all -D amd-use-llvm=false -D draw-use-llvm=false/' \
-	./PKGBUILD
+	"$PKGBUILD"
 
-cat ./PKGBUILD
+cat "$PKGBUILD"
 
 # Do not build if version does not match with upstream
 if check-upstream-version; then

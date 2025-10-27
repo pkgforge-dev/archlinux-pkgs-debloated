@@ -3,8 +3,10 @@
 # This script compares the version of the PKGBUILD with the upstream version
 # This is to avoid pushing packages that are too new causing partial updates as result
 
-pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' ./PKGBUILD)
-pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' ./PKGBUILD)
+set -e
+
+pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' "$PKGBUILD")
+pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' "$PKGBUILD")
 CURRENT_VERSION="$pkgver"-"$pkgrel"
 UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 
