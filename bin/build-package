@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -ex
+
 export ARCH="$(uname -m)"
 export CC=gcc
 export CXX=g++
