@@ -61,6 +61,7 @@ while :; do
 		echo "----------------------------------------"
 		break
 	else
+		rm -rf "$BUILD_DIR"
 		>&2 echo "----------------------------------------"
 		>&2 echo "Failed to build package, trying again..."
 		>&2 echo "----------------------------------------"
