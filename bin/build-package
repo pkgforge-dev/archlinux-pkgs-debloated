@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export ARCH="$(uname -m)"
 export CC=gcc
 export CXX=g++
 
@@ -8,6 +9,19 @@ PACKAGE="${SCRIPT##*/}"
 PACKAGE="${PACKAGE%-mini.sh}"
 PACKAGE="${PACKAGE%-nano.sh}"
 export PACKAGE
+export BUILD_DIR="$PWD"/tmpbuild
+
+_cleanup() { rm -rf "$BUILD_DIR"; }
+trap _cleanup INT TERM EXIT
+
+case "$ARCH" in
+	'x86_64')  export EXT=zst;;
+	'aarch64') export EXT=xz ;;
+	*)
+		>&2 echo "Unsupported Arch: '$ARCH'"
+		exit 1
+		;;
+esac
 
 if [ "$PACKAGE" != 'qt6-base' ]; then
 	export CMAKE_C_COMPILER_LAUNCHER=ccache

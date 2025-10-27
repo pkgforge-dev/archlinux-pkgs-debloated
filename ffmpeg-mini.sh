@@ -1,29 +1,18 @@
 #!/bin/sh
 
-set -ex
-
-ARCH="$(uname -m)"
-tmpbuild="$PWD"/tmpbuild
-_cleanup() { rm -rf "$tmpbuild"; }
-trap _cleanup INT TERM EXIT
+set -e
 
 sed -i -e 's|-O2|-Oz|' /etc/makepkg.conf
 
 case "$ARCH" in
 	x86_64)
-		EXT=zst
-		git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/ffmpeg.git "$tmpbuild"
-		cd "$tmpbuild"
+		git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/ffmpeg.git "$BUILD_DIR"
+		cd "$BUILD_DIR"
 		;;
 	aarch64)
-		EXT=xz
-		git clone --depth 1 https://github.com/archlinuxarm/PKGBUILDs.git "$tmpbuild"
-		cd "$tmpbuild"
+		git clone --depth 1 https://github.com/archlinuxarm/PKGBUILDs.git "$BUILD_DIR"
+		cd "$BUILD_DIR"
 		mv ./extra/ffmpeg/* ./extra/ffmpeg/.* ./
-		;;
-	*)
-		>&2 echo "Unsupported Arch: '$ARCH'"
-		exit 1
 		;;
 esac
 # change arch for aarch64 support
@@ -45,12 +34,11 @@ cat ./PKGBUILD
 if check-upstream-version; then
 	makepkg -fs --noconfirm --skippgpcheck
 else
-		exit 0
+	exit 0
 fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
 mv -v ./"$PACKAGE"-*.pkg.tar."$EXT" ../"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT"
-cd ..
-rm -rf "$tmpbuild"
+
 echo "All done!"
