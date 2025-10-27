@@ -11,7 +11,7 @@ cd "$BUILD_DIR"
 sed -i \
 	-e '/x265/d'                                \
 	-e '/librav1e/d'                            \
-	-e '/--enable-libsvtav1//d'                 \
+	-e '/--enable-libsvtav1/d'                  \
 	-e 's/--enable-vapoursynth/--enable-small/' \
 	"$PKGBUILD"
 
