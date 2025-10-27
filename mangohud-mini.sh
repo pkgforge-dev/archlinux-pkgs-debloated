@@ -8,7 +8,7 @@ get-pkgbuild
 cd "$BUILD_DIR"
 
 # remove libxnvctrl since it is not possible in aarch64
-if [ "$ARCH" = 'x86_64' ]; then
+if [ "$ARCH" = 'aarch64' ]; then
 	sed -i \
 		-e "s|'libxnvctrl'||"                                                 \
 		-e "s|-Dmangohudctl=true|-Dmangohudctl=true -Dwith_xnvctrl=disabled|" \
