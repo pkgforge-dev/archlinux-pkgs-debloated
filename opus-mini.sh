@@ -2,25 +2,20 @@
 
 set -e
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$BUILD_DIR"
+get-pkgbuild
 cd "$BUILD_DIR"
-
-# change arch for aarch64 support
-sed -i -e "s|x86_64|$ARCH|" ./PKGBUILD
-# build without debug info
-sed -i -e 's|-g1|-g0|' ./PKGBUILD
 
 # debloat package, remove features that make the lib 5 MiB
 sed -i \
 	-e '/-D deep-plc=enabled/d' \
 	-e '/-D dred=enabled/d' \
 	-e '/-D osce=enabled/d' \
-	./PKGBUILD
+	"$PKGBUILD"
 
 # skip tests since they take too long
 sed -i -e 's|meson test -C build|echo "skipped" #meson test -C build|' ./PKGBUILD
 
-cat ./PKGBUILD
+cat "$PKGBUILD"
 
 # Do not build if version does not match with upstream
 if check-upstream-version; then

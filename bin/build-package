@@ -12,6 +12,7 @@ PACKAGE="${PACKAGE%-mini.sh}"
 PACKAGE="${PACKAGE%-nano.sh}"
 export PACKAGE
 export BUILD_DIR="$PWD"/tmpbuild
+export PKGBUILD="$BUILD_DIR"/PKGBUILD
 
 _cleanup() { rm -rf "$BUILD_DIR"; }
 trap _cleanup INT TERM EXIT
@@ -54,11 +55,12 @@ while :; do
 		if [ -f ~/OPERATION_ABORTED ]; then
 			exit 0
 		fi
-		>&2 echo "----------------------------------------"
-		>&2 echo "Package built successfully!"
-		>&2 echo "----------------------------------------"
+		echo "----------------------------------------"
+		echo "Package built successfully!"
+		echo "----------------------------------------"
 		break
 	else
+		rm -rf "$BUILD_DIR"
 		>&2 echo "----------------------------------------"
 		>&2 echo "Failed to build package, trying again..."
 		>&2 echo "----------------------------------------"

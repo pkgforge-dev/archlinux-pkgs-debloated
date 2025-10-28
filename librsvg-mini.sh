@@ -2,21 +2,16 @@
 
 set -e
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$BUILD_DIR"
+get-pkgbuild
 cd "$BUILD_DIR"
-
-# change arch for aarch64 support
-sed -i -e "s|x86_64|$ARCH|" ./PKGBUILD
-# build without debug info
-sed -i -e 's|-g1|-g0|' ./PKGBUILD
 
 # add back pixbuf loader
 sed -i \
 	-e 's|pixbuf-loader=disabled|pixbuf-loader=enabled|' \
 	-e 's|meson test|echo meson test|'                   \
-	./PKGBUILD
+	"$PKGBUILD"
 
-cat ./PKGBUILD
+cat "$PKGBUILD"
 
 # Do not build if version does not match with upstream
 if check-upstream-version; then

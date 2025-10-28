@@ -4,21 +4,13 @@ set -e
 
 sed -i -e 's|-O2|-Oz|' /etc/makepkg.conf
 
-git clone --depth 1 https://gitlab.archlinux.org/archlinux/packaging/packages/"$PACKAGE" "$BUILD_DIR"
+get-pkgbuild
 cd "$BUILD_DIR"
 
 case "$ARCH" in
-	x86_64)
-		TARGETS_TO_BUILD="X86;AMDGPU"
-		;;
-	aarch64)
-		TARGETS_TO_BUILD="AArch64;AMDGPU"
-		;;
+	'x86_64')  TARGETS_TO_BUILD="X86;AMDGPU"    ;;
+	'aarch64') TARGETS_TO_BUILD="AArch64;AMDGPU";;
 esac
-# change arch for aarch64 support
-sed -i -e "s|x86_64|$ARCH|" ./PKGBUILD
-# build without debug info
-sed -i -e 's|-g1|-g0|' ./PKGBUILD
 
 # debloat package, limit llvm targets, build with MinSizeRel
 sed -i \
@@ -28,12 +20,12 @@ sed -i \
 	-e "s|-DLLVM_BUILD_DOCS=ON|-DLLVM_TARGETS_TO_BUILD=\"$TARGETS_TO_BUILD\"|" \
 	-e 's|-DLLVM_ENABLE_SPHINX=ON|-DLLVM_ENABLE_SPHINX=OFF|' \
 	-e 's|rm -r|#rm -r|' \
-	./PKGBUILD
+	"$PKGBUILD"
 
 # disable tests (they take too long)
-sed -i -e 's|LD_LIBRARY_PATH|#LD_LIBRARY_PATH|' ./PKGBUILD
+sed -i -e 's|LD_LIBRARY_PATH|#LD_LIBRARY_PATH|' "$PKGBUILD"
 
-cat ./PKGBUILD
+cat "$PKGBUILD"
 
 # Do not build if version does not match with upstream
 if check-upstream-version; then
