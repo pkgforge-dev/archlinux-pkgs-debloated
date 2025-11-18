@@ -24,6 +24,7 @@ sed -i \
 	-e '/llvm-libs/d'      \
 	-e 's/vulkan-swrast//' \
 	-e 's/opencl-mesa//'   \
+	-e 's/i915,//'         \
 	-e 's/r300,//'         \
 	-e 's/r600,//'         \
 	-e 's/llvmpipe,//'     \
