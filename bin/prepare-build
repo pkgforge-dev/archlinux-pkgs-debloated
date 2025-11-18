@@ -1,6 +1,8 @@
 #!/bin/sh
 
 echo "Installing basic packages..."
+pacman-key --init
+pacman -Syy --noconfirm archlinux-keyring
 pacman -Syu --noconfirm \
 	base-devel \
 	ccache     \
