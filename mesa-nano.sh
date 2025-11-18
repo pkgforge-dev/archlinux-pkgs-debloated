@@ -37,6 +37,11 @@ sed -i \
 	-e 's/-D video-codecs=all/-D video-codecs=all -D amd-use-llvm=false -D draw-use-llvm=false/' \
 	"$PKGBUILD"
 
+# Why??? https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/36545
+sed -i \
+	-e 's|cd mesa-$_pkgver|cd mesa-$_pkgver; sed -i -e "s/gallium_i915 or with_gallium_r300/gallium_i915 and with_gallium_r300/g" ./meson.build|' \
+	"$PKGBUILD"
+
 cat "$PKGBUILD"
 
 # Do not build if version does not match with upstream
