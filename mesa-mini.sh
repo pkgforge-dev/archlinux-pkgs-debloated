@@ -37,7 +37,7 @@ sed -i \
 
 # Why??? https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/36545
 sed -i \
-	-e 's|cd mesa-$_pkgver|cd mesa-$_pkgver; sed -i -e \'s/gallium_i915 or with_gallium_r300/gallium_i915 and with_gallium_r300/g\' ./meson.build|' \
+	-e 's|cd mesa-$_pkgver|cd mesa-$_pkgver; sed -i -e "s/gallium_i915 or with_gallium_r300/gallium_i915 and with_gallium_r300/g" ./meson.build|' \
 	"$PKGBUILD"
 
 cat "$PKGBUILD"
