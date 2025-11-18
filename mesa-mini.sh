@@ -22,6 +22,7 @@ sed -i \
 	-e '/llvm-libs/d'      \
 	-e 's/vulkan-swrast//' \
 	-e 's/opencl-mesa//'   \
+	-e 's/i915,//'         \
 	-e 's/r300,//'         \
 	-e 's/r600,//'         \
 	-e 's/llvmpipe,//'     \
@@ -33,11 +34,6 @@ sed -i \
 	-e 's/gallium-rusticl=true/gallium-rusticl=false/' \
 	-e 's/valgrind=enabled/valgrind=disabled/'         \
 	-e 's/-D video-codecs=all/-D video-codecs=all -D amd-use-llvm=false -D draw-use-llvm=false/' \
-	"$PKGBUILD"
-
-# Why??? https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/36545
-sed -i \
-	-e 's|cd mesa-$_pkgver|cd mesa-$_pkgver; sed -i -e "s/gallium_i915 or with_gallium_r300/gallium_i915 and with_gallium_r300/g" ./meson.build|' \
 	"$PKGBUILD"
 
 cat "$PKGBUILD"
