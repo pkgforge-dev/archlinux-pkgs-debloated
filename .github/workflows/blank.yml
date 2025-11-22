@@ -176,7 +176,7 @@ jobs:
         run: /bin/sh ./bin/build-package ${{ matrix.script }}.sh
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ format('{0}-{1}', matrix.script, matrix.arch) }}
           path: "dist"
