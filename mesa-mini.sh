@@ -30,6 +30,7 @@ sed -i \
 	-e '/sysprof/d'        \
 	-e '/_pick vkswrast/d' \
 	-e '/_pick opencl/d'   \
+	-e '/gallium-rusticl-enable-drivers/d' \
 	-e 's/intel-rt=enabled/intel-rt=disabled/'         \
 	-e 's/gallium-rusticl=true/gallium-rusticl=false/' \
 	-e 's/valgrind=enabled/valgrind=disabled/'         \
