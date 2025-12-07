@@ -14,7 +14,7 @@ if [ "$ARCH" = 'x86_64' ]; then
 			-e '/_pick vkasahi/d'     \
 			-e 's/vulkan-freedreno//' \
 			-e 's/vulkan-asahi//'     \
-			-e 's/,asahi//g'          \
+			-e 's/asahi,//g'          \
 			-e 's/,freedreno//g'      \
 			"$PKGBUILD"
 fi
