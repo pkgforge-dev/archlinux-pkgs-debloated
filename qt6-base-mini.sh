@@ -10,7 +10,7 @@ cd "$BUILD_DIR"
 # debloat package, remove the line that enables icu support
 sed -i \
 	-e 's/-DCMAKE_BUILD_TYPE=RelWithDebInfo/-DCMAKE_BUILD_TYPE=MinSizeRel/' \
-	-e 's/-DFEATURE_journald=ON/-DFEATURE_journald=OFF/'                    \
+	-e 's/-DFEATURE_journald=ON/-DFEATURE_journald=OFF -DFEATURE_vnc=OFF/'  \
 	-e '/-DFEATURE_libproxy=ON \\/a\    -DFEATURE_icu=OFF \\'               \
 	"$PKGBUILD"
 
