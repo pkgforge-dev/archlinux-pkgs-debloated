@@ -136,6 +136,14 @@ jobs:
           - arch: x86_64
             platform: linux/amd64
             runs-on: ubuntu-24.04
+            script: icu-mini
+          - arch: aarch64
+            platform: linux/arm64
+            runs-on: ubuntu-24.04-arm
+            script: icu-mini
+          - arch: x86_64
+            platform: linux/amd64
+            runs-on: ubuntu-24.04
             script: intel-media-driver-mini
     container:
       image: ghcr.io/pkgforge-dev/archlinux:latest
