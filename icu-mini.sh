@@ -12,7 +12,7 @@ cd "$BUILD_DIR"
 
 # use filter
 sed -i \
-	-e 's|cd icu/source|export ICU_DATA_FILTER_FILE="$(readlink -f ../filter.json)"; cd icu/source|g' \
+	-e 's|cd icu/source|export ICU_DATA_FILTER_FILE="$(readlink -f ../filter.json)"; cat "$ICU_DATA_FILTER_FILE"; cd icu/source|g' \
 	"$PKGBUILD"
 
 # download the data dir because meme library has to make this a nightmare
