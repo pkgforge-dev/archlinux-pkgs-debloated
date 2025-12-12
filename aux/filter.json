@@ -1,0 +1,101 @@
+{
+  "localeFilter": {
+    "filterType": "locale",
+    "includeChildren": false,
+    "includelist": [
+      "en_US",
+      "en_GB"
+    ]
+  },
+  "featureFilters": {
+    "brkitr_dictionaries": "exclude",
+    "brkitr_rules": {
+      "filterType": "regex",
+      "excludelist": [
+        "^.*_cj$"
+      ]
+    },
+    "coll_tree": {
+      "filterType": "language",
+      "includelist": [
+        "be",
+        "cs",
+        "de",
+        "el",
+        "en",
+        "es",
+        "ff",
+        "fr",
+        "ha",
+        "hu",
+        "ig",
+        "it",
+        "kk",
+        "ms",
+        "nl",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "tr",
+        "uk",
+        "xh",
+        "zu"
+      ]
+    },
+    "conversion_mappings": "exclude",
+    "stringprep": {
+      "excludelist": [
+        "rfc3722",
+        "rfc3920node",
+        "rfc3920res"
+      ]
+    }
+  },
+  "resourceFilters": [
+    {
+      "categories": [
+        "coll_tree"
+      ],
+      "rules": [
+        "-/collations/emoji",
+        "-/collations/private-unihan"
+      ]
+    },
+    {
+      "categories": [
+        "translit"
+      ],
+      "rules": [
+        "-/",
+        "+/%%Parent",
+        "+/%%ALIAS",
+        "+/*/ASCII-Latin",
+        "+/*/Latin-ASCII",
+        "+/*/Accents-Any",
+        "+/*/Any-Accents",
+        "+/*/Publishing-Any",
+        "+/*/Any-Publishing",
+        "+/*/Cyrillic-Latin",
+        "+/*/Cyrl-Latn",
+        "+/*/Latin-Cyrillic",
+        "+/*/Latn-Cyrl",
+        "+/*/Greek-Latin",
+        "+/*/Grek-Latn",
+        "+/*/Greek-Latin/BGN",
+        "+/*/el-el_Latn/BGN",
+        "+/*/Latin-Greek",
+        "+/*/Latn-Grek",
+        "+/*/Russian-Latin/BGN",
+        "+/*/ru-ru_Latn/BGN",
+        "+/*/Latin-Russian/BGN",
+        "+/*/ru_Latn-ru/BGN",
+        "+/*/Ukrainian-Latin/BGN",
+        "+/*/uk-uk_Latn/BGN",
+        "+/*/de-ASCII",
+        "+/*/de-t-de-d0-ascii"
+      ]
+    }
+  ],
+  "collationUCAData": "implicithan"
+}
