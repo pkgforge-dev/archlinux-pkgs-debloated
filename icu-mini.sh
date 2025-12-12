@@ -3,6 +3,7 @@
 set -e
 
 sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
+pacman -S --noconfirm wget unzip
 
 get-pkgbuild
 
