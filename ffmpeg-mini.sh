@@ -10,6 +10,9 @@ cd "$BUILD_DIR"
 # debloat package, remove x265 support and AV1 encoding support
 sed -i \
 	-e '/x265/d'                                \
+	-e '/aom/d'                                 \
+	-e '/amf/d'                                 \
+	-e '/opencl/d'                              \
 	-e '/librav1e/d'                            \
 	-e '/--enable-libsvtav1/d'                  \
 	-e 's/--enable-vapoursynth/--enable-small/' \
