@@ -13,6 +13,7 @@ sed -i \
 	-e '/aom/d'                                 \
 	-e '/amf/d'                                 \
 	-e '/opencl/d'                              \
+	-e '/placebo/d'                             \
 	-e '/librav1e/d'                            \
 	-e '/--enable-libsvtav1/d'                  \
 	-e 's/--enable-vapoursynth/--enable-small/' \
