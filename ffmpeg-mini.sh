@@ -16,6 +16,7 @@ sed -i \
 	-e '/librav1e/d'                            \
 	-e '/--enable-libsvtav1/d'                  \
 	-e 's/--enable-vapoursynth/--enable-small/' \
+	-e 's/--enable-libglslang/--disable-vdpau/' \
 	"$PKGBUILD"
 
 cat "$PKGBUILD"
