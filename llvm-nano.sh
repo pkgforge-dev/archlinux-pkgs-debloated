@@ -8,8 +8,8 @@ get-pkgbuild
 cd "$BUILD_DIR"
 
 case "$ARCH" in
-	'x86_64')  TARGETS_TO_BUILD="X86"    ;;
-	'aarch64') TARGETS_TO_BUILD="AArch64";;
+	'x86_64')  TARGETS_TO_BUILD="X86;AMDGPU"    ;;
+	'aarch64') TARGETS_TO_BUILD="AArch64;AMDGPU";;
 esac
 
 # debloat package, limit llvm targets, build with MinSizeRel
