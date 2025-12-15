@@ -8,6 +8,9 @@ get-pkgbuild
 cd "$BUILD_DIR"
 
 # debloat package, remove x265 support and AV1 encoding support
+# remove a lot of image formats support and other stuff like opencore
+# a lot of these changes make ffmpeg more similar to what void and alpine do
+# so they should not cause issues to most applications
 sed -i \
 	-e '/x265/d'                                \
 	-e '/aom/d'                                 \
@@ -15,6 +18,12 @@ sed -i \
 	-e '/opencl/d'                              \
 	-e '/placebo/d'                             \
 	-e '/librav1e/d'                            \
+	-e '/frei0r/d'                              \
+	-e '/gsm/d'                                 \
+	-e '/opencore/d'                            \
+	-e '/libjxl/d'                              \
+	-e '/librsvg/d'                             \
+	-e '/libopenjpeg/d'                         \
 	-e '/--enable-libsvtav1/d'                  \
 	-e 's/--enable-vapoursynth/--enable-small/' \
 	-e 's/--enable-libglslang/--disable-vdpau/' \
