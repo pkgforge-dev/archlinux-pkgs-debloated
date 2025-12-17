@@ -26,7 +26,9 @@ elif [ "$ARCH" = 'aarch64' ]; then
 fi
 
 # change arch for aarch64 support, even ArchlinuxARM PKGBUILDs need this...
-sed -i -e "s|x86_64|$ARCH|" "$PKGBUILD"
+if ! grep -q "arch=.*$ARCH" ./PKGBUILD; then
+	sed -i -e "s|x86_64|$ARCH|" ./PKGBUILD
+fi
 
 # always build without debug info
 sed -i -e 's|-g1|-g0|' "$PKGBUILD"
