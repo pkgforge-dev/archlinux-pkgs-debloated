@@ -25,6 +25,10 @@ elif [ "$ARCH" = 'aarch64' ]; then
 	rm -rf "$ALARM_DIR"
 fi
 
+echo "----------------------------------------"
+ls -la "$BUILD_DIR"
+echo "----------------------------------------"
+
 # change arch for aarch64 support, even ArchlinuxARM PKGBUILDs need this...
 if ! grep -q "arch=.*$ARCH" ./PKGBUILD; then
 	sed -i -e "s|x86_64|$ARCH|" ./PKGBUILD
