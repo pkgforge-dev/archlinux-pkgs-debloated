@@ -2,8 +2,6 @@
 
 set -e
 
-sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
-
 get-pkgbuild
 cd "$BUILD_DIR"
 
