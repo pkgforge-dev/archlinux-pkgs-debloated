@@ -13,8 +13,8 @@ if [ "$ARCH" = 'x86_64' ]; then
 		sed -i \
 			-e '/_pick vkfdreno/d'    \
 			-e '/_pick vkasahi/d'     \
-			-e '/_pick vkbroadcom/d'  \
-			-e '/_pick vkpanfrost/d'  \
+			-e '/_pick vkbrcom/d'     \
+			-e '/_pick vkpfrost/d'    \
 			-e '/_pick vkpowrvr/d'    \
 			-e 's/vulkan-broadcom//'  \
 			-e 's/vulkan-freedreno//' \
