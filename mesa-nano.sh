@@ -5,15 +5,24 @@ set -e
 get-pkgbuild
 cd "$BUILD_DIR"
 
+x64_gallium='crocus,d3d12,iris,nouveau,r600,radeonsi,softpipe,svga,virgl,zink'
+x64_vulkan='amd,intel,intel_hasvk,virtio,microsoft-experimental,nouveau,gfxstream'
+
 # remove aarch64 drivers from x86_64
 if [ "$ARCH" = 'x86_64' ]; then
 		sed -i \
 			-e '/_pick vkfdreno/d'    \
 			-e '/_pick vkasahi/d'     \
+			-e '/_pick vkbrcom/d'     \
+			-e '/_pick vkpfrost/d'    \
+			-e '/_pick vkpowrvr/d'    \
+			-e 's/vulkan-broadcom//'  \
 			-e 's/vulkan-freedreno//' \
+			-e 's/vulkan-panfrost//'  \
+			-e 's/vulkan-powervr//'   \
 			-e 's/vulkan-asahi//'     \
-			-e 's/asahi,//g'          \
-			-e 's/,freedreno//g'      \
+			-e "s|gallium-drivers=.*|gallium-drivers=$x64_gallium|" \
+			-e "s|vulkan-drivers=.*|vulkan-drivers=$x64_vulkan|"    \
 			"$PKGBUILD"
 fi
 
