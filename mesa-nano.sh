@@ -23,8 +23,8 @@ if [ "$ARCH" = 'x86_64' ]; then
 			-e 's/vulkan-asahi//'     \
 			-e 's/asahi,//g'          \
 			-e 's/,freedreno//g'      \
-			-e "s|gallium-drivers=.*|$x64_gallium|" \
-			-e "s|vulkan-drivers=.*|vulkan-drivers=$x64_vulkan|" \
+			-e "s|gallium-drivers=.*|gallium-drivers=$x64_gallium|" \
+			-e "s|vulkan-drivers=.*|vulkan-drivers=$x64_vulkan|"    \
 			"$PKGBUILD"
 fi
 
