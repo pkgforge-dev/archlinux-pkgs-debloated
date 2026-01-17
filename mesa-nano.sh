@@ -67,6 +67,7 @@ rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
 mv -v ./mesa-*.pkg.tar."$EXT"           ../mesa-nano-"$ARCH".pkg.tar."$EXT"
 mv -v ./vulkan-radeon-*.pkg.tar."$EXT"  ../vulkan-radeon-nano-"$ARCH".pkg.tar."$EXT"
 mv -v ./vulkan-nouveau-*.pkg.tar."$EXT" ../vulkan-nouveau-nano-"$ARCH".pkg.tar."$EXT"
+mv -v ./vulkan-virtio-*.pkg.tar."$EXT"  ../vulkan-virtio-nano-"$ARCH".pkg.tar."$EXT"
 
 if [ "$ARCH" = 'x86_64' ]; then
 	mv -v ./vulkan-intel-*.pkg.tar."$EXT" ../vulkan-intel-nano-"$ARCH".pkg.tar."$EXT"
