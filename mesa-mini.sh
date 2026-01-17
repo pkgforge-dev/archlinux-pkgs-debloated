@@ -31,6 +31,7 @@ if [ "$ARCH" = 'x86_64' ]; then
 		"$PKGBUILD"
 elif [ "$ARCH" = 'aarch64' ]; then
 	sed -i \
+		-e '/_pick vkintel/d' \
 		-e "s|gallium-drivers=.*|gallium-drivers=$arm_gallium|" \
 		-e "s|vulkan-drivers=.*|vulkan-drivers=$arm_vulkan|"    \
 		"$PKGBUILD"
