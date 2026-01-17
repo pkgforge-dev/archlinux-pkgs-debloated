@@ -5,37 +5,45 @@ set -e
 get-pkgbuild
 cd "$BUILD_DIR"
 
-x64_gallium='crocus,d3d12,iris,nouveau,r600,radeonsi,softpipe,svga,virgl,zink'
-x64_vulkan='amd,intel,intel_hasvk,virtio,microsoft-experimental,nouveau,gfxstream'
+common_gallium='d3d12,nouveau,radeonsi,softpipe,svga,virgl,zink'
+x64_gallium="crocus,iris,r600,$common_gallium"
+arm_gallium="asahi,freedreno,nouveau,etnaviv,lima,panfrost,rocket,v3d,vc4,$common_gallium"
+
+common_vulkan='amd,nouveau,virtio,microsoft-experimental,gfxstream'
+x64_vulkan="intel,intel_hasvk,$common_vulkan"
+arm_vulkan="asahi,broadcom,freedreno,panfrost,imagination,$common_vulkan"
 
 # remove aarch64 drivers from x86_64
 if [ "$ARCH" = 'x86_64' ]; then
-		sed -i \
-			-e '/_pick vkfdreno/d'    \
-			-e '/_pick vkasahi/d'     \
-			-e '/_pick vkbrcom/d'     \
-			-e '/_pick vkpfrost/d'    \
-			-e '/_pick vkpowrvr/d'    \
-			-e 's/vulkan-broadcom//'  \
-			-e 's/vulkan-freedreno//' \
-			-e 's/vulkan-panfrost//'  \
-			-e 's/vulkan-powervr//'   \
-			-e 's/vulkan-asahi//'     \
-			-e "s|gallium-drivers=.*|gallium-drivers=$x64_gallium|" \
-			-e "s|vulkan-drivers=.*|vulkan-drivers=$x64_vulkan|"    \
-			"$PKGBUILD"
+	sed -i \
+		-e '/_pick vkfdreno/d'    \
+		-e '/_pick vkasahi/d'     \
+		-e '/_pick vkbrcom/d'     \
+		-e '/_pick vkpfrost/d'    \
+		-e '/_pick vkpowrvr/d'    \
+		-e 's/vulkan-broadcom//'  \
+		-e 's/vulkan-freedreno//' \
+		-e 's/vulkan-panfrost//'  \
+		-e 's/vulkan-powervr//'   \
+		-e 's/vulkan-asahi//'     \
+		-e "s|gallium-drivers=.*|gallium-drivers=$x64_gallium|" \
+		-e "s|vulkan-drivers=.*|vulkan-drivers=$x64_vulkan|"    \
+		"$PKGBUILD"
+elif [ "$ARCH" = 'aarch64' ]; then
+	sed -i \
+		-e '/_pick vkintel/d' \
+		-e 's/vulkan-intel//'  \
+		-e "s|gallium-drivers=.*|gallium-drivers=$arm_gallium|" \
+		-e "s|vulkan-drivers=.*|vulkan-drivers=$arm_vulkan|"    \
+		"$PKGBUILD"
 fi
 
 # debloat package, remove software rast, remove ancient drivers, build iwhtout linking to llvm
 sed -i \
 	-e '/llvm-libs/d'      \
+	-e '/sysprof/d'        \
 	-e 's/vulkan-swrast//' \
 	-e 's/opencl-mesa//'   \
-	-e 's/i915,//'         \
-	-e 's/r300,//'         \
-	-e 's/llvmpipe,//'     \
-	-e 's/swrast,//'       \
-	-e '/sysprof/d'        \
 	-e '/_pick vkswrast/d' \
 	-e '/_pick opencl/d'   \
 	-e '/gallium-rusticl-enable-drivers/d' \
@@ -67,6 +75,7 @@ elif [ "$ARCH" = 'aarch64' ]; then
 	mv -v ./vulkan-panfrost-*.pkg.tar."$EXT"  ../vulkan-panfrost-nano-"$ARCH".pkg.tar."$EXT"
 	mv -v ./vulkan-freedreno-*.pkg.tar."$EXT" ../vulkan-freedreno-nano-"$ARCH".pkg.tar."$EXT"
 	mv -v ./vulkan-asahi-*.pkg.tar."$EXT"     ../vulkan-asahi-nano-"$ARCH".pkg.tar."$EXT"
+	mv -v ./vulkan-powervr-*.pkg.tar."$EXT"   ../vulkan-powervr-nano-"$ARCH".pkg.tar."$EXT"
 fi
 
 echo "All done!"
