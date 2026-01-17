@@ -75,6 +75,7 @@ elif [ "$ARCH" = 'aarch64' ]; then
 	mv -v ./vulkan-panfrost-*.pkg.tar."$EXT"  ../vulkan-panfrost-mini-"$ARCH".pkg.tar."$EXT"
 	mv -v ./vulkan-freedreno-*.pkg.tar."$EXT" ../vulkan-freedreno-mini-"$ARCH".pkg.tar."$EXT"
 	mv -v ./vulkan-asahi-*.pkg.tar."$EXT"     ../vulkan-asahi-mini-"$ARCH".pkg.tar."$EXT"
+	mv -v ./vulkan-powervr-*.pkg.tar."$EXT"   ../vulkan-powervr-mini-"$ARCH".pkg.tar."$EXT"
 fi
 
 echo "All done!"
