@@ -7,7 +7,7 @@ cd "$BUILD_DIR"
 
 common_gallium='d3d12,radeonsi,softpipe,virgl,zink'
 x64_gallium="crocus,iris,r600,$common_gallium"
-arm_gallium="asahi,freedreno,nouveau,etnaviv,lima,panfrost,rocket,v3d,vc4,$common_gallium"
+arm_gallium="asahi,freedreno,etnaviv,lima,panfrost,rocket,v3d,vc4,$common_gallium"
 
 common_vulkan='amd,nouveau,virtio,microsoft-experimental,gfxstream'
 x64_vulkan="intel,intel_hasvk,$common_vulkan"
