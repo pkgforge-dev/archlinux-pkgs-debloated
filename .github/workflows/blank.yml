@@ -128,6 +128,14 @@ jobs:
           - arch: x86_64
             platform: linux/amd64
             runs-on: ubuntu-24.04
+            script: mesa-zink-mini
+          - arch: aarch64
+            platform: linux/arm64
+            runs-on: ubuntu-24.04-arm
+            script: mesa-zink-mini
+          - arch: x86_64
+            platform: linux/amd64
+            runs-on: ubuntu-24.04
             script: mangohud-mini
           - arch: aarch64
             platform: linux/arm64
