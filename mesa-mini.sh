@@ -5,7 +5,7 @@ set -e
 get-pkgbuild
 cd "$BUILD_DIR"
 
-common_gallium='d3d12,nouveau,radeonsi,softpipe,virgl,zink'
+common_gallium='d3d12,radeonsi,softpipe,virgl,zink'
 x64_gallium="crocus,iris,r600,$common_gallium"
 arm_gallium="asahi,freedreno,nouveau,etnaviv,lima,panfrost,rocket,v3d,vc4,$common_gallium"
 
