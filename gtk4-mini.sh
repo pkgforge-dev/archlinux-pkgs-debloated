@@ -2,6 +2,8 @@
 
 set -e
 
+sed -i -e 's|-O2|-Os -fno-strict-aliasing -fno-fast-math -fno-plt|' /etc/makepkg.conf
+
 get-pkgbuild
 cd "$BUILD_DIR"
 
