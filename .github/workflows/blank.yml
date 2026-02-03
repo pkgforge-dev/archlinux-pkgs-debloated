@@ -166,7 +166,7 @@ jobs:
           
       - name: set up ccache
         if: ${{ matrix.script != 'qt6-base-mini' }}
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
@@ -175,7 +175,7 @@ jobs:
             
       - name: set up sccache
         if: ${{ matrix.script == 'qt6-base-mini' }}
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/sccache/
           key: ${{ runner.os }}-sccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
