@@ -12,7 +12,7 @@ sed -i -e 's|-g1|-g0|' ./PKGBUILD
 
 # debloat package, remove proprietary blob that makes the lib huge
 sed -i \
-	-e 's|-DINSTALL_DRIVER_SYSCONF=OFF|-DINSTALL_DRIVER_SYSCONF=OFF -DBUILD_TYPE=MinSizeRel -DENABLE_NONFREE_KERNELS=OFF|' \
+	-e 's|-Wno-dev|-Wno-dev -DBUILD_TYPE=MinSizeRel -DENABLE_NONFREE_KERNELS=OFF|' \
 	"$PKGBUILD"
 
 cat "$PKGBUILD"
