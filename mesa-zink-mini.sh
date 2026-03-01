@@ -29,6 +29,7 @@ sed -i \
 	-e 's/vulkan-panfrost//'                            \
 	-e 's/vulkan-powervr//'                             \
 	-e 's/vulkan-asahi//'                               \
+	-e 's/vulkan-kosmickrisp//'                         \
 	-e 's/vulkan-mesa-layers//'                         \
 	-e 's/vulkan-mesa-implicit-layers//'                \
 	-e '/gallium-rusticl-enable-drivers/d'              \

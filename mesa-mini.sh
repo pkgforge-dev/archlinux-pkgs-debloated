@@ -40,12 +40,14 @@ fi
 
 # debloat package, remove software rast, remove ancient drivers, build iwhtout linking to llvm
 sed -i \
-	-e '/llvm-libs/d'      \
-	-e '/sysprof/d'        \
-	-e 's/vulkan-swrast//' \
-	-e 's/opencl-mesa//'   \
-	-e '/_pick vkswrast/d' \
-	-e '/_pick opencl/d'   \
+	-e '/llvm-libs/d'           \
+	-e '/sysprof/d'             \
+	-e 's/vulkan-swrast//'      \
+	-e 's/vulkan-kosmickrisp//' \
+	-e 's/opencl-mesa//'        \
+	-e '/_pick vkswrast/d'      \
+	-e '/_pick opencl/d'        \
+	-e 's/_pick vkkosmic/d'     \
 	-e '/gallium-rusticl-enable-drivers/d' \
 	-e 's/intel-rt=enabled/intel-rt=disabled/'         \
 	-e 's/gallium-rusticl=true/gallium-rusticl=false/' \
