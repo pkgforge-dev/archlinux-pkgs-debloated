@@ -49,7 +49,7 @@ sed -i \
 	-e 's/opencl-mesa//'        \
 	-e '/_pick vkswrast/d'      \
 	-e '/_pick opencl/d'        \
-	-e 's/_pick vkkosmic/d'     \
+	-e '/_pick vkkosmic/d'      \
 	-e '/gallium-rusticl-enable-drivers/d' \
 	-e 's/intel-rt=enabled/intel-rt=disabled/'         \
 	-e 's/gallium-rusticl=true/gallium-rusticl=false/' \
