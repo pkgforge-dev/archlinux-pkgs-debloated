@@ -13,7 +13,7 @@ sed -i \
 	"$PKGBUILD"
 
 # skip tests since they take too long
-sed -i -e 's|meson test -C build|echo "skipped" #meson test -C build|' ./PKGBUILD
+sed -i -e 's|meson test -C build|echo "skipped" #meson test -C build|' "$PKGBUILD"
 
 cat "$PKGBUILD"
 
