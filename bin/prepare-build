@@ -19,7 +19,6 @@ echo "Settings up build options..."
 sed -i \
 	-e 's|DEBUG_CFLAGS="-g"|DEBUG_CFLAGS="-g0"|' \
 	-e 's|-fno-omit-frame-pointer|-fomit-frame-pointer|' \
-	-e 's|-fcf-protection||' \
 	-e 's|-mno-omit-leaf-frame-pointer||' \
 	-e 's|-Wp,-D_FORTIFY_SOURCE=3||' \
 	-e 's|-fstack-clash-protection||' \
