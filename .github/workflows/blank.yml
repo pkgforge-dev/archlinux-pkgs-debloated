@@ -229,7 +229,7 @@ jobs:
           merge-multiple: true
 
       - name: release
-        uses: softprops/action-gh-release@v2.3.3
+        uses: softprops/action-gh-release@v3.0.0
         with:
           name: "Continuous build"
           tag_name: continuous
