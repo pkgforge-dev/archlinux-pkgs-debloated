@@ -169,6 +169,22 @@ jobs:
             platform: linux/amd64
             runs-on: ubuntu-24.04
             script: intel-media-driver-mini
+          - arch: x86_64
+            platform: linux/amd64
+            runs-on: ubuntu-24.04
+            script: glycin-mini
+          - arch: aarch64
+            platform: linux/arm64
+            runs-on: ubuntu-24.04-arm
+            script: glycin-mini
+          - arch: x86_64
+            platform: linux/amd64
+            runs-on: ubuntu-24.04
+            script: gtk2-mini
+          - arch: aarch64
+            platform: linux/arm64
+            runs-on: ubuntu-24.04-arm
+            script: gtk2-mini
     container:
       image: ghcr.io/pkgforge-dev/archlinux:latest
     env:

@@ -1,4 +1,4 @@
-# archlinux-pkgs-debloated 
+# archlinux-pkgs-debloated
 
 *Previously known as 'llvm-libs-debloated'*
 
@@ -10,7 +10,7 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 * `mesa-nano` and `vulkan-{radeon,intel,etc}-nano` similar to `mesa-mini`, built with -Os which makes it ~30% smaller. Note -Os can have a performance and even stability issue so do not use this package in apps like emulators where this is critical.
 
-* `llvm-libs-mini` smaller version of `libLLVM.so` which is a 150+ MiB library, this version is reduced down to 99 MiB. 
+* `llvm-libs-mini` smaller version of `libLLVM.so` which is a 150+ MiB library, this version is reduced down to 99 MiB.
 
 * `llvm-libs-nano`, similar to `mini`, but with the llvm targets limited (`x86_64` or `aarch64`) + `AMDGPU`, this reduces the size of the library to less than 70 MiB. Note this will cause issues if application depends on more llvm targets like compilers.
 
@@ -20,9 +20,13 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 * `opus-mini` I have no idea why Archlinux makes this lib 5 MiB when both ubuntu and alpine make it <500 KiB
 
-* `gdk-pixbuf2-mini`, `librsvg-mini` These remove the glycin dependency, ~20 MiB of bloat. (glycin is also super buggy and depends on `bwrap` which is problematic for running appimages in very old kernels)
+* `gdk-pixbuf2-mini`, `librsvg-mini` These remove the glycin dependency, ~20 MiB of bloat. (glycin is also super buggy and depends on `bwrap` which is problematic for running appimages in very old kernels).
 
-* `icu-mini` Much smaller version of `libicudata.so` that is less than 3 MIB in size (10x reduction in size). 
+* `glycin-mini` Builds [`glycin-ng`](https://github.com/QaidVoid/glycin-ng), alternative to glycin that does not have the many problems that GNOME glycin has.
+
+* `icu-mini` Much smaller version of `libicudata.so` that is less than 3 MIB in size (10x reduction in size).
+
+* `gtk2-mini` Builds `gtk2-ng-git`, a community-maintained fork of GTK2.
 
 # Projects using these packages
 
