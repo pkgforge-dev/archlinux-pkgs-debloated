@@ -28,6 +28,8 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 * `gtk2-mini` Builds `gtk2-ng-git`, a community-maintained fork of GTK2.
 
+* `libdecor-mini` Builds [`libdecor-rs`](https://github.com/QaidVoid/libdecor-rs), rust implementation of libdecor without GTK/D-Bus dependencies (Ideal for SDL apps).
+
 # Projects using these packages
 
 * [Anylinux-AppImages](https://github.com/pkgforge-dev/Anylinux-AppImages) - [ghostty](https://github.com/pkgforge-dev/ghostty-appimage), [citron](https://github.com/pkgforge-dev/Citron-appimage) and many more

@@ -24,7 +24,7 @@ jobs:
       security-events: write
       contents: write
     runs-on: ${{ matrix.runs-on }}
-    continue-on-error: false
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -165,6 +165,14 @@ jobs:
             platform: linux/arm64
             runs-on: ubuntu-24.04-arm
             script: kiconthemes-mini
+          - arch: x86_64
+            platform: linux/amd64
+            runs-on: ubuntu-24.04
+            script: libdecor-mini
+          - arch: aarch64
+            platform: linux/arm64
+            runs-on: ubuntu-24.04-arm
+            script: libdecor-mini
           - arch: x86_64
             platform: linux/amd64
             runs-on: ubuntu-24.04

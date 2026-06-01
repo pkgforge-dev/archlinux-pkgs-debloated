@@ -26,3 +26,12 @@ sed -i 's|EUID == 0|EUID == 69|g' /usr/bin/makepkg
 mkdir -p /usr/local/bin
 cp /usr/bin/makepkg /usr/local/bin
 echo "------------------------------------------------------------"
+
+# workaround crates.io blocking curl
+cat > /usr/local/bin/curl-ua << 'EOF'
+#!/bin/sh
+exec /usr/bin/curl -A "nixpkgs-fetchCargoVendor/2 (https://github.com/NixOS/nixpkgs)" "$@"
+EOF
+chmod +x /usr/local/bin/curl-ua
+
+sed -i 's|https::/usr/bin/curl |https::/usr/local/bin/curl-ua |' /etc/makepkg.conf
