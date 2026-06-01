@@ -28,6 +28,8 @@ sed -i \
 cat /etc/makepkg.conf
 echo "------------------------------------------------------------"
 
+echo 'user-agent = "nixpkgs-fetchCargoVendor/2 (https://github.com/NixOS/nixpkgs)"' > ~/.curlrc
+
 echo "Hacking makepkg to allow building as root in the container..."
 sed -i 's|EUID == 0|EUID == 69|g' /usr/bin/makepkg
 mkdir -p /usr/local/bin
