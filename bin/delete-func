@@ -10,69 +10,69 @@ if [ ! -f "$PKGBUILD" ]; then
 	exit 1
 fi
 
-for FUNC do
-	LC_ALL=C awk -v func="$FUNC" '
+for FUNC; do
+	LC_ALL=C awk -v name="$FUNC" '
 	BEGIN {
-		in_func = 0   # 0=outside, 1=waiting for "{", 2=inside body
-		depth = 0
-		is_target = 0
-		target_pat = "^[[:space:]]*[a-zA-Z0-9_-]*" func "[a-zA-Z0-9_-]*\\(\\)"
-		any_func   = "^[[:space:]]*[a-zA-Z0-9_-]+\\(\\)"
+		state   = 0   # 0=outside, 1=waiting for "{", 2=inside body
+		depth   = 0
+		target  = 0
+		target_pat = "^[[:space:]]*[a-zA-Z0-9_-]*" name "[a-zA-Z0-9_-]*\\(\\)"
+		func_pat   = "^[[:space:]]*[a-zA-Z0-9_-]+\\(\\)"
 	}
 
-	in_func == 0 {
+	state == 0 {
 		if ($0 ~ target_pat) {
-			is_target = 1
+			target = 1
 			tmp = $0
 			opens = gsub(/\{/, "&", tmp)
 			closes = gsub(/\}/, "&", tmp)
 			if (opens > 0) {
 				depth = opens - closes
-				in_func = (depth > 0) ? 2 : 0
+				state = (depth > 0) ? 2 : 0
 			} else {
-				in_func = 1
+				state = 1
 			}
 			next
 		}
-		if ($0 ~ any_func) {
-			is_target = 0
+		if ($0 ~ func_pat) {
+			target = 0
 			tmp = $0
 			opens = gsub(/\{/, "&", tmp)
 			closes = gsub(/\}/, "&", tmp)
 			if (opens > 0) {
 				depth = opens - closes
-				in_func = (depth > 0) ? 2 : 0
+				state = (depth > 0) ? 2 : 0
 			} else {
-				in_func = 1
+				state = 1
 			}
 			print
 			next
 		}
-		gsub(func, "")
+		gsub(name, "")
 		print
 	}
 
-	in_func == 1 {
+	state == 1 {
 		tmp = $0
 		opens = gsub(/\{/, "&", tmp)
 		closes = gsub(/\}/, "&", tmp)
 		if (opens > 0) {
 			depth = opens - closes
-			in_func = (depth > 0) ? 2 : 0
+			state = (depth > 0) ? 2 : 0
 		}
-		if (! is_target) print
+		if (! target) print
 	}
 
-	in_func == 2 {
+	state == 2 {
 		tmp = $0
 		opens = gsub(/\{/, "&", tmp)
 		closes = gsub(/\}/, "&", tmp)
 		depth += opens - closes
-		if (! is_target) print
+		if (! target) print
 		if (depth <= 0) {
-			in_func = 0
+			state = 0
 			depth = 0
-			is_target = 0
+			target = 0
 		}
 	}
 	' "$PKGBUILD" > "$PKGBUILD.tmp" && mv "$PKGBUILD.tmp" "$PKGBUILD"
