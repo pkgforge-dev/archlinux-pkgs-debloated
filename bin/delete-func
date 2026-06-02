@@ -1,0 +1,81 @@
+#!/bin/sh
+# Remove functions and strings from a PKGBUILD
+#  * Deletes any function that contains the given string
+#  * Removes all occurrences of the string from the PKGBUILD
+
+set -e
+
+if [ ! -f "$PKGBUILD" ]; then
+	>&2 echo "ERROR: PKGBUILD env var is not set or file not found"
+	exit 1
+fi
+
+for FUNC; do
+	LC_ALL=C awk -v name="$FUNC" '
+	BEGIN {
+		state   = 0   # 0=outside, 1=waiting for "{", 2=inside body
+		depth   = 0
+		target  = 0
+		target_pat = "^[[:space:]]*[a-zA-Z0-9_-]*" name "[a-zA-Z0-9_-]*\\(\\)"
+		func_pat   = "^[[:space:]]*[a-zA-Z0-9_-]+\\(\\)"
+	}
+
+	state == 0 {
+		if ($0 ~ target_pat) {
+			target = 1
+			tmp = $0
+			opens = gsub(/\{/, "&", tmp)
+			closes = gsub(/\}/, "&", tmp)
+			if (opens > 0) {
+				depth = opens - closes
+				state = (depth > 0) ? 2 : 0
+			} else {
+				state = 1
+			}
+			next
+		}
+		if ($0 ~ func_pat) {
+			target = 0
+			tmp = $0
+			opens = gsub(/\{/, "&", tmp)
+			closes = gsub(/\}/, "&", tmp)
+			if (opens > 0) {
+				depth = opens - closes
+				state = (depth > 0) ? 2 : 0
+			} else {
+				state = 1
+			}
+			print
+			next
+		}
+		gsub(name, "")
+		print
+	}
+
+	state == 1 {
+		tmp = $0
+		opens = gsub(/\{/, "&", tmp)
+		closes = gsub(/\}/, "&", tmp)
+		if (opens > 0) {
+			depth = opens - closes
+			state = (depth > 0) ? 2 : 0
+		}
+		if (! target) print
+	}
+
+	state == 2 {
+		tmp = $0
+		opens = gsub(/\{/, "&", tmp)
+		closes = gsub(/\}/, "&", tmp)
+		depth += opens - closes
+		if (! target) print
+		if (depth <= 0) {
+			state = 0
+			depth = 0
+			target = 0
+		}
+	}
+	' "$PKGBUILD" > "$PKGBUILD.tmp" && mv "$PKGBUILD.tmp" "$PKGBUILD"
+
+	echo "Removed $FUNC"
+done

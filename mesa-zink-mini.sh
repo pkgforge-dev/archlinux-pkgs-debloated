@@ -11,27 +11,16 @@ cd "$BUILD_DIR"
 gallium='d3d12,softpipe,virgl,zink'
 
 # remove as much as possible and only leave gallium
+delete-func vulkan-intel vulkan-radeon vulkan-nouveau vulkan-swrast \
+	vulkan-virtio vulkan-gfxstream vulkan-dzn vulkan-broadcom vulkan-freedreno \
+	vulkan-panfrost vulkan-powervr vulkan-asahi vulkan-kosmickrisp \
+	vulkan-mesa-layers vulkan-mesa-implicit-layers opencl-mesa
+
 sed -i \
 	-e '/llvm-libs/d'                                   \
 	-e '/sysprof/d'                                     \
 	-e '/_pick vk/d'                                    \
 	-e '/_pick opencl/d'                                \
-	-e 's/opencl-mesa//'                                \
-	-e 's/vulkan-intel//'                               \
-	-e 's/vulkan-radeon//'                              \
-	-e 's/vulkan-nouveau//'                             \
-	-e 's/vulkan-swrast//'                              \
-	-e 's/vulkan-virtio//'                              \
-	-e 's/vulkan-gfxstream//'                           \
-	-e 's/vulkan-dzn//'                                 \
-	-e 's/vulkan-broadcom//'                            \
-	-e 's/vulkan-freedreno//'                           \
-	-e 's/vulkan-panfrost//'                            \
-	-e 's/vulkan-powervr//'                             \
-	-e 's/vulkan-asahi//'                               \
-	-e 's/vulkan-kosmickrisp//'                         \
-	-e 's/vulkan-mesa-layers//'                         \
-	-e 's/vulkan-mesa-implicit-layers//'                \
 	-e '/gallium-rusticl-enable-drivers/d'              \
 	-e 's/intel-rt=enabled/intel-rt=disabled/'          \
 	-e 's/gallium-rusticl=true/gallium-rusticl=false/'  \

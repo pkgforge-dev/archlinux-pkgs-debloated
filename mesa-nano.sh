@@ -17,36 +17,30 @@ arm_vulkan="asahi,broadcom,freedreno,panfrost,imagination,$common_vulkan"
 
 # remove aarch64 drivers from x86_64
 if [ "$ARCH" = 'x86_64' ]; then
+	delete-func vulkan-freedreno vulkan-asahi vulkan-broadcom vulkan-panfrost vulkan-powervr
 	sed -i \
 		-e '/_pick vkfdreno/d'    \
 		-e '/_pick vkasahi/d'     \
 		-e '/_pick vkbrcom/d'     \
 		-e '/_pick vkpfrost/d'    \
 		-e '/_pick vkpowrvr/d'    \
-		-e 's/vulkan-broadcom//'  \
-		-e 's/vulkan-freedreno//' \
-		-e 's/vulkan-panfrost//'  \
-		-e 's/vulkan-powervr//'   \
-		-e 's/vulkan-asahi//'     \
 		-e "s|gallium-drivers=.*|gallium-drivers=$x64_gallium|" \
 		-e "s|vulkan-drivers=.*|vulkan-drivers=$x64_vulkan|"    \
 		"$PKGBUILD"
 elif [ "$ARCH" = 'aarch64' ]; then
+	delete-func vulkan-intel
 	sed -i \
 		-e '/_pick vkintel/d' \
-		-e 's/vulkan-intel//'  \
 		-e "s|gallium-drivers=.*|gallium-drivers=$arm_gallium|" \
 		-e "s|vulkan-drivers=.*|vulkan-drivers=$arm_vulkan|"    \
 		"$PKGBUILD"
 fi
 
-# debloat package, remove software rast, remove ancient drivers, build iwhtout linking to llvm
+# debloat package, remove software rast, remove ancient drivers, build without linking to llvm
+delete-func vulkan-swrast vulkan-kosmickrisp opencl-mesa
 sed -i \
 	-e '/llvm-libs/d'           \
 	-e '/sysprof/d'             \
-	-e 's/vulkan-swrast//'      \
-	-e 's/vulkan-kosmickrisp//' \
-	-e 's/opencl-mesa//'        \
 	-e '/_pick vkswrast/d'      \
 	-e '/_pick opencl/d'        \
 	-e '/_pick vkkosmic/d'      \
