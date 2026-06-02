@@ -49,6 +49,11 @@ sed -i \
 	-e 's/-D video-codecs=all/-D video-codecs=all -D amd-use-llvm=false -D draw-use-llvm=false/' \
 	"$PKGBUILD"
 
+# Patch AMDGPU DRM version check for compatibility with older kernels
+sed -i '/^  cd mesa-\$_pkgver$/a\
+	echo "Patching amdgpu DRM version check..."\
+	find . -name "ac_gpu_info.c" -print -exec sed -i "s/info->drm_minor < 54/info->drm_minor < 0/" {} \\;' "$PKGBUILD"
+
 cat "$PKGBUILD"
 
 # Do not build if version does not match with upstream
