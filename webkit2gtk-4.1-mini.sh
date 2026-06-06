@@ -25,7 +25,7 @@ sed -i '/^	cd webkitgtk-\$pkgver$/a\
 	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" Source/WebKit/UIProcess/Launcher/glib/BubblewrapLauncher.cpp' "$PKGBUILD"
 
 # aarch64 runner hangs after a while (OOM?)
-sed -i -e 's|cmake --build build|cmake --build build -j8|' "$PKGBUILD"
+sed -i -e 's|cmake --build build|cmake --build build -j2|' "$PKGBUILD"
 
 cat "$PKGBUILD"
 
