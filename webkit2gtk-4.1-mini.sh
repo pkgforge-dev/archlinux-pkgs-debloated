@@ -11,6 +11,7 @@ sed -i '/-D USE_SOUP2=OFF/a\
 	-D ENABLE_JAVASCRIPT_SHELL=OFF\
 	-D ENABLE_SAMPLING_PROFILER=OFF\
 	-D ENABLE_PDFJS=OFF\
+	-D USE_SKIA=OFF\
 	-D ENABLE_WEBDRIVER=OFF\
 	-D USE_SYSPROF_CAPTURE=OFF\
 	-D ENABLE_JOURNALD_LOG=OFF' "$PKGBUILD"
@@ -22,6 +23,9 @@ sed -i 's|rm -r|rm -rf|' "$PKGBUILD"
 sed -i '/^	cd webkitgtk-\$pkgver$/a\
 	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp\
 	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" Source/WebKit/UIProcess/Launcher/glib/BubblewrapLauncher.cpp' "$PKGBUILD"
+
+# aarch64 runner hangs after a while (OOM?)
+sed -i -e 's|cmake --build build|cmake --build build -j8|' "$PKGBUILD"
 
 cat "$PKGBUILD"
 
