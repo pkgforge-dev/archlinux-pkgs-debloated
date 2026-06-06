@@ -12,7 +12,8 @@ sed -i '/-D USE_SOUP2=OFF/a\
 	-D ENABLE_SAMPLING_PROFILER=OFF\
 	-D ENABLE_PDFJS=OFF\
 	-D ENABLE_WEBDRIVER=OFF\
-	-D USE_SYSPROF_CAPTURE=OFF' "$PKGBUILD"
+	-D USE_SYSPROF_CAPTURE=OFF\
+	-D ENABLE_JOURNALD_LOG=OFF' "$PKGBUILD"
 
 # rm -r fails when target dir doesn't exist
 sed -i 's|rm -r|rm -rf|' "$PKGBUILD"
