@@ -2,7 +2,8 @@
 
 set -e
 
-sed -i -e 's|-O2|-Os -fno-exceptions -fno-asynchronous-unwind-tables|' /etc/makepkg.conf
+sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
+sed -i -e 's|-fexceptions|-fno-exceptions -fno-asynchronous-unwind-tables|' /etc/makepkg.conf
 
 get-pkgbuild
 cd "$BUILD_DIR"
