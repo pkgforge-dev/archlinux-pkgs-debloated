@@ -213,22 +213,12 @@ jobs:
           persist-credentials: false
 
       - name: set up ccache
-        if: ${{ matrix.script != 'qt6-base-mini' }}
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-
-
-      - name: set up sccache
-        if: ${{ matrix.script == 'qt6-base-mini' }}
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/sccache/
-          key: ${{ runner.os }}-sccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-sccache-${{ matrix.script }}-${{ matrix.arch }}-
 
       - name: prepare container
         run: /bin/sh ./bin/prepare-build
