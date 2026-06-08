@@ -206,7 +206,7 @@ jobs:
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPILERCHECK: content
-      CCACHE_SLOPPINESS: time_macros,file_macro
+      CCACHE_SLOPPINESS: time_macros,file_macro,include_file_mtime,include_file_ctime
     steps:
       - uses: actions/checkout@v4
         with:
