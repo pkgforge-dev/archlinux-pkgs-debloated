@@ -26,9 +26,6 @@ sed -i '/^	cd webkitgtk-\$pkgver$/a\
 	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp\
 	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" Source/WebKit/UIProcess/Launcher/glib/BubblewrapLauncher.cpp' "$PKGBUILD"
 
-# aarch64 runner hangs after a while (OOM?)
-sed -i -e 's|cmake --build build|cmake --build build -j2|' "$PKGBUILD"
-
 cat "$PKGBUILD"
 
 if check-upstream-version; then

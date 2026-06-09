@@ -35,3 +35,14 @@ EOF
 chmod +x /usr/local/bin/curl-ua
 
 sed -i 's|https::/usr/bin/curl |https::/usr/local/bin/curl-ua |' /etc/makepkg.conf
+
+echo "------------------------------------------------------------"
+echo "Setting up swap..."
+if [ ! -f /swapfile ]; then
+	fallocate -l 6G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=6144
+	chmod 600 /swapfile
+	mkswap /swapfile
+	swapon /swapfile
+fi
+free -h
+swapon --show

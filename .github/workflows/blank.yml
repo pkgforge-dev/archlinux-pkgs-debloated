@@ -203,6 +203,7 @@ jobs:
             script: webkit2gtk-4.1-mini
     container:
       image: ghcr.io/pkgforge-dev/archlinux:latest
+      options: --cap-add=SYS_ADMIN
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPILERCHECK: content
