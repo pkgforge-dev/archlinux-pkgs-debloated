@@ -38,11 +38,11 @@ sed -i 's|https::/usr/bin/curl |https::/usr/local/bin/curl-ua |' /etc/makepkg.co
 
 echo "------------------------------------------------------------"
 echo "Setting up swap..."
-if [ ! -f /swapfile ]; then
-	fallocate -l 6G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=6144
-	chmod 600 /swapfile
-	mkswap /swapfile
-	swapon /swapfile
+if [ ! -e /swapfile2 ]; then
+	fallocate -l 3G /swapfile2 || dd if=/dev/zero of=/swapfile2 bs=1M count=3072
+	chmod 600 /swapfile2
+	mkswap /swapfile2
+	swapon /swapfile2
 fi
 free -h
 swapon --show
