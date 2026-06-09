@@ -21,7 +21,7 @@ CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe -fno-plt -fexceptions -fno-fast-m
 		-Wformat -fcf-protection -fomit-frame-pointer -fno-strict-aliasing"
 CXXFLAGS="$CFLAGS -Wp,-D_GLIBCXX_ASSERTIONS"
 LDFLAGS="-Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now \
-		-Wl,-z,pack-relative-relocs"
+		-Wl,-z,pack-relative-relocs -fuse-ld=mold"
 LTOFLAGS="-flto=auto"
 MAKEFLAGS="-j$(nproc)"
 DEBUG_CFLAGS="-g0"

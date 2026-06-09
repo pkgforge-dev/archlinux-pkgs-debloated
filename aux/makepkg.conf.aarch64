@@ -22,7 +22,7 @@ CFLAGS="-march=armv8-a -O2 -pipe -fno-plt -fexceptions -fno-fast-math \
 	-Wformat -fomit-frame-pointer -fno-strict-aliasing"
 CXXFLAGS="$CFLAGS -Wp,-D_GLIBCXX_ASSERTIONS"
 LDFLAGS="-Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now \
-		-Wl,-z,pack-relative-relocs"
+		-Wl,-z,pack-relative-relocs -fuse-ld=mold"
 LTOFLAGS=""
 MAKEFLAGS="-j$(nproc)"
 DEBUG_CFLAGS="-g0"
