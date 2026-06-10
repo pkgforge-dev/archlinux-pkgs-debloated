@@ -22,7 +22,7 @@ CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe -fno-plt -fexceptions -fno-fast-m
 		-Wno-unknown-warning-option -Wno-sfinae-incomplete"
 CXXFLAGS="$CFLAGS -Wp,-D_GLIBCXX_ASSERTIONS"
 LDFLAGS="-Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now \
-		-Wl,-z,pack-relative-relocs -fuse-ld=mold"
+		-Wl,-z,pack-relative-relocs"
 LTOFLAGS="-flto=auto"
 MAKEFLAGS="-j$(nproc)"
 DEBUG_CFLAGS="-g0"
