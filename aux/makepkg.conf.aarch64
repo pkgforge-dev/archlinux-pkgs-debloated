@@ -19,7 +19,8 @@ CHOST="aarch64-unknown-linux-gnu"
 
 CPPFLAGS=""
 CFLAGS="-march=armv8-a -O2 -pipe -fno-plt -fexceptions -fno-fast-math \
-	-Wformat -fomit-frame-pointer -fno-strict-aliasing"
+	-Wformat -fomit-frame-pointer -fno-strict-aliasing \
+	-Wno-unknown-warning-option -Wno-sfinae-incomplete"
 CXXFLAGS="$CFLAGS -Wp,-D_GLIBCXX_ASSERTIONS"
 LDFLAGS="-Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now \
 		-Wl,-z,pack-relative-relocs"

@@ -18,7 +18,8 @@ CARCH="x86_64"
 CHOST="x86_64-pc-linux-gnu"
 
 CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe -fno-plt -fexceptions -fno-fast-math \
-		-Wformat -fcf-protection -fomit-frame-pointer -fno-strict-aliasing"
+		-Wformat -fcf-protection -fomit-frame-pointer -fno-strict-aliasing \
+		-Wno-unknown-warning-option -Wno-sfinae-incomplete"
 CXXFLAGS="$CFLAGS -Wp,-D_GLIBCXX_ASSERTIONS"
 LDFLAGS="-Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now \
 		-Wl,-z,pack-relative-relocs -fuse-ld=mold"
