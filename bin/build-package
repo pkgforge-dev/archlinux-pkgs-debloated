@@ -26,13 +26,8 @@ case "$ARCH" in
 		;;
 esac
 
-if [ "$PACKAGE" != 'qt6-base' ]; then
-	export CMAKE_C_COMPILER_LAUNCHER=ccache
-	export CMAKE_CXX_COMPILER_LAUNCHER=ccache
-else
-	export CMAKE_C_COMPILER_LAUNCHER=sccache
-	export CMAKE_CXX_COMPILER_LAUNCHER=sccache
-fi
+export CMAKE_C_COMPILER_LAUNCHER=ccache
+export CMAKE_CXX_COMPILER_LAUNCHER=ccache
 
 export PATH="$PWD:$PWD/bin:$PATH:/usr/bin/core_perl"
 chmod +x "$PWD"/bin/* "$PWD"/*.sh
@@ -74,11 +69,7 @@ while :; do
 	fi
 done
 
-if [ "$PACKAGE" != 'qt6-base' ]; then
-	ccache -s -v
-else
-	sccache --show-stats
-fi
+ccache -s -v
 
 mkdir ./dist
 sha256sum ./*.pkg.tar.*

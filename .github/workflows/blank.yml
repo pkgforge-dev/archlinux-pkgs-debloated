@@ -193,34 +193,33 @@ jobs:
             platform: linux/arm64
             runs-on: ubuntu-24.04-arm
             script: gtk2-mini
+          - arch: x86_64
+            platform: linux/amd64
+            runs-on: ubuntu-24.04
+            script: webkit2gtk-4.1-mini
+          - arch: aarch64
+            platform: linux/arm64
+            runs-on: ubuntu-24.04-arm
+            script: webkit2gtk-4.1-mini
     container:
       image: ghcr.io/pkgforge-dev/archlinux:latest
+      options: --cap-add=SYS_ADMIN --security-opt seccomp=unconfined
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPILERCHECK: content
-      CCACHE_SLOPPINESS: time_macros
+      CCACHE_SLOPPINESS: time_macros,file_macro,include_file_mtime,include_file_ctime
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
       - name: set up ccache
-        if: ${{ matrix.script != 'qt6-base-mini' }}
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-
-
-      - name: set up sccache
-        if: ${{ matrix.script == 'qt6-base-mini' }}
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/sccache/
-          key: ${{ runner.os }}-sccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-sccache-${{ matrix.script }}-${{ matrix.arch }}-
 
       - name: prepare container
         run: /bin/sh ./bin/prepare-build
