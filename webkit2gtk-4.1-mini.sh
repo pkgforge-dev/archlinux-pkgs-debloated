@@ -21,9 +21,9 @@ sed -i '/-D USE_SOUP2=OFF/a\
 sed -i 's|rm -r|rm -rf|' "$PKGBUILD"
 
 # make WEBKIT_EXEC_PATH env var always available (useful for appimage)
-sed -i '/^	cd webkitgtk-\$pkgver$/a\
-	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp\
-	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" Source/WebKit/UIProcess/Launcher/glib/BubblewrapLauncher.cpp' "$PKGBUILD"
+sed -i '/prepare() {/a\
+	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" webkitgtk-$pkgver/Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp\
+	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" webkitgtk-$pkgver/Source/WebKit/UIProcess/Launcher/glib/BubblewrapLauncher.cpp' "$PKGBUILD"
 
 cat "$PKGBUILD"
 
