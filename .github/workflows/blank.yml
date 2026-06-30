@@ -28,187 +28,41 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        script:
+          - llvm-mini
+          - llvm-nano
+          - libxml2-mini
+          - qt6-base-mini
+          - gtk3-mini
+          - gtk4-mini
+          - gdk-pixbuf2-mini
+          - librsvg-mini
+          - ffmpeg-mini
+          - sdl2_image-mini
+          - x265-mini
+          - opus-mini
+          - mesa-mini
+          - mesa-nano
+          - mesa-zink-mini
+          - mangohud-mini
+          - icu-mini
+          - kiconthemes-mini
+          - libdecor-mini
+          - intel-media-driver-mini
+          - glycin-mini
+          - gtk2-mini
+          - webkit2gtk-4.1-mini
+        arch: [x86_64, aarch64]
         include:
           - arch: x86_64
             platform: linux/amd64
             runs-on: ubuntu-24.04
-            script: llvm-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: llvm-nano
           - arch: aarch64
             platform: linux/arm64
             runs-on: ubuntu-24.04-arm
-            script: llvm-mini
+        exclude:
           - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: llvm-nano
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: libxml2-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: libxml2-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: qt6-base-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: qt6-base-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: gtk3-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: gtk3-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: gtk4-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: gtk4-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: gdk-pixbuf2-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: gdk-pixbuf2-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: librsvg-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: librsvg-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: ffmpeg-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: ffmpeg-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: sdl2_image-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: sdl2_image-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: x265-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: x265-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: opus-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: opus-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: mesa-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: mesa-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: mesa-nano
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: mesa-nano
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: mesa-zink-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: mesa-zink-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: mangohud-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: mangohud-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: icu-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: icu-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: kiconthemes-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: kiconthemes-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: libdecor-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: libdecor-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
             script: intel-media-driver-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: glycin-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: glycin-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: gtk2-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: gtk2-mini
-          - arch: x86_64
-            platform: linux/amd64
-            runs-on: ubuntu-24.04
-            script: webkit2gtk-4.1-mini
-          - arch: aarch64
-            platform: linux/arm64
-            runs-on: ubuntu-24.04-arm
-            script: webkit2gtk-4.1-mini
     container:
       image: ghcr.io/pkgforge-dev/archlinux:latest
       options: --cap-add=SYS_ADMIN --security-opt seccomp=unconfined
