@@ -18,6 +18,8 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 * `ffmpeg-mini` which removes 20 MiB libx265.so dependency, also removes AV1 enconding support (decoding still works).
 
+* `sdl2_image-mini` removes AVIF and JPEG-XL support from `SDL2_image`. AVIF pulls in `libavif` plus the whole AV1 codec family (`libaom`, `SvtAv1Enc`, `rav1e`, `dav1d`) and JPEG-XL pulls `libjxl` — ~23 MiB combined that most apps never use. PNG/JPG/TIFF/WEBP still work.
+
 * `opus-mini` I have no idea why Archlinux makes this lib 5 MiB when both ubuntu and alpine make it <500 KiB
 
 * `gdk-pixbuf2-mini`, `librsvg-mini` These remove the glycin dependency, ~20 MiB of bloat. (glycin is also super buggy and depends on `bwrap` which is problematic for running appimages in very old kernels).
