@@ -8,7 +8,7 @@ export PACKAGE=mesa
 get-pkgbuild
 cd "$BUILD_DIR"
 
-gallium='d3d12,softpipe,virgl,zink'
+gallium='softpipe,virgl,zink'
 
 # remove as much as possible and only leave gallium
 delete-func vulkan-intel vulkan-radeon vulkan-nouveau vulkan-swrast \

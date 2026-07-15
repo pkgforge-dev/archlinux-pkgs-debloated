@@ -5,11 +5,11 @@ set -e
 get-pkgbuild
 cd "$BUILD_DIR"
 
-common_gallium='d3d12,nouveau,radeonsi,softpipe,svga,virgl,zink'
+common_gallium='nouveau,radeonsi,softpipe,svga,virgl,zink'
 x64_gallium="crocus,iris,r600,$common_gallium"
 arm_gallium="asahi,freedreno,etnaviv,lima,panfrost,rocket,v3d,vc4,$common_gallium"
 
-common_vulkan='amd,nouveau,virtio,microsoft-experimental,gfxstream'
+common_vulkan='amd,nouveau,virtio,gfxstream'
 x64_vulkan="intel,intel_hasvk,$common_vulkan"
 arm_vulkan="asahi,broadcom,freedreno,panfrost,imagination,$common_vulkan"
 
@@ -35,13 +35,14 @@ elif [ "$ARCH" = 'aarch64' ]; then
 fi
 
 # debloat package, remove software rast, remove ancient drivers, build without linking to llvm
-delete-func vulkan-swrast vulkan-kosmickrisp opencl-mesa
+delete-func vulkan-swrast vulkan-kosmickrisp opencl-mesa vulkan-dzn
 sed -i \
 	-e '/llvm-libs/d'           \
 	-e '/sysprof/d'             \
 	-e '/_pick vkswrast/d'      \
 	-e '/_pick opencl/d'        \
 	-e '/_pick vkkosmic/d'      \
+	-e '/_pick vkd3d12/d'       \
 	-e '/gallium-rusticl-enable-drivers/d' \
 	-e 's/intel-rt=enabled/intel-rt=disabled/'         \
 	-e 's/gallium-rusticl=true/gallium-rusticl=false/' \
