@@ -9,8 +9,9 @@ cd "$BUILD_DIR"
 
 # debloat package, remove linking to broadway and cloudproviders
 sed -i \
-	-e '/broadway/d'        \
-	-e '/cloudproviders=/d' \
+	-e '/broadway/d'                     \
+	-e '/cloudproviders=/d'              \
+	-e 's/tracker3=true/tracker3=false/' \
 	"$PKGBUILD"
 
 cat "$PKGBUILD"
