@@ -38,6 +38,7 @@ jobs:
           - gdk-pixbuf2-mini
           - librsvg-mini
           - ffmpeg-mini
+          - ffmpeg-nano
           - sdl2_image-mini
           - x265-mini
           - opus-mini
