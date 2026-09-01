@@ -18,6 +18,8 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 * `ffmpeg-mini` which removes 20 MiB libx265.so dependency, also removes AV1 enconding support (decoding still works).
 
+* `ffmpeg-nano` a much more stripped down ffmpeg that only decodes `mp3`, `opus`, `vorbis`, `png` and `jpeg` (no encoders, no hardware acceleration, no external codec libraries).
+
 * `sdl2_image-mini` removes AVIF and JPEG-XL support from `SDL2_image`. AVIF pulls in `libavif` plus the whole AV1 codec family (`libaom`, `SvtAv1Enc`, `rav1e`, `dav1d`) and JPEG-XL pulls `libjxl` — ~23 MiB combined that most apps never use. PNG/JPG/TIFF/WEBP still work.
 
 * `opus-mini` I have no idea why Archlinux makes this lib 5 MiB when both ubuntu and alpine make it <500 KiB
