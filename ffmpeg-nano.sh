@@ -32,6 +32,7 @@ makedepends=(\
     --disable-stripping \\\
     --enable-shared \\\
     --enable-small \\\
+    --enable-lto \\\
     --disable-autodetect \\\
     --disable-network \\\
     --disable-programs \\\
