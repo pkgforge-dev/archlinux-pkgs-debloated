@@ -7,7 +7,11 @@ sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
 get-pkgbuild
 cd "$BUILD_DIR"
 
-# debloat package down to just decoders for mp3, opus, vorbis, png and jpeg.
+# debloat package down to a small set of decoders for the most common
+# audio, image and video formats: mp3, opus, vorbis, flac, aac, png,
+# jpeg, h264, vp8, vp9, theora and wav (pcm). every decoder added is
+# native, so no external libraries are linked, dependencies stay at
+# glibc and zlib.
 # --disable-autodetect turns off every external library and all hardware
 # acceleration. --disable-encoders drops every encoder, and all decoders are
 # disabled except the ones for the formats above.
@@ -41,7 +45,7 @@ makedepends=(\
     --enable-gpl \\\
     --disable-encoders \\\
     --disable-decoders \\\
-    --enable-decoder=mp3,mp3float,opus,vorbis,png,mjpeg \\\
+    --enable-decoder=mp3,mp3float,opus,vorbis,flac,aac,aac_latm,png,mjpeg,h264,vp8,vp9,theora,pcm_s16le,pcm_s24le,pcm_s32le,pcm_f32le,pcm_u8,pcm_alaw,pcm_mulaw \\\
     --enable-zlib' \
 	-e '/qt-faststart/d' \
 	-e '/doc\/ff{mpeg,play}/d' \
