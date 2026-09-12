@@ -142,6 +142,7 @@ jobs:
           - mesa-nano
           - glycin-mini
           - libdecor-mini
+          - gtk3-mini
         arch: [riscv64, loongarch64, ppc64le, ppc64]
         include:
           - { arch: riscv64, platform: linux/riscv64 }
