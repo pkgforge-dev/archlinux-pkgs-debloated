@@ -23,7 +23,9 @@ jobs:
       actions: read
       security-events: write
       contents: write
-    runs-on: ${{ matrix.runs-on }}
+    # llvm and webkit are much faster on blacksmith, everything else stays on
+    # the github-hosted runners to keep costs down
+    runs-on: ${{ contains(fromJSON('["llvm-mini","llvm-nano","webkit2gtk-4.1-mini"]'), matrix.script) && matrix.blacksmith-runs-on || matrix.runs-on }}
     continue-on-error: true
     strategy:
       fail-fast: false
@@ -57,9 +59,11 @@ jobs:
           - arch: x86_64
             platform: linux/amd64
             runs-on: ubuntu-24.04
+            blacksmith-runs-on: blacksmith-8vcpu-ubuntu-2404
           - arch: aarch64
             platform: linux/arm64
             runs-on: ubuntu-24.04-arm
+            blacksmith-runs-on: blacksmith-8vcpu-ubuntu-2404-arm
         exclude:
           - arch: aarch64
             script: intel-media-driver-mini
@@ -110,7 +114,7 @@ jobs:
       actions: read
       security-events: write
       contents: write
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-16vcpu-ubuntu-2404
     continue-on-error: true
     strategy:
       fail-fast: false
