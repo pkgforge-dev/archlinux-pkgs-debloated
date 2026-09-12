@@ -13,7 +13,6 @@ pacman -Syu --noconfirm \
 	git        \
 	mold       \
 	ninja      \
-	sccache    \
 	wget
 
 echo "------------------------------------------------------------"

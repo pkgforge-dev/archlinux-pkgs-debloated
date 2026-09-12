@@ -44,7 +44,6 @@ jobs:
           - opus-mini
           - mesa-mini
           - mesa-nano
-          - mesa-zink-mini
           - mangohud-mini
           - icu-mini
           - kiconthemes-mini
@@ -72,12 +71,13 @@ jobs:
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros,file_macro,include_file_mtime,include_file_ctime
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: set up ccache
-        uses: actions/cache@v4
+        if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
@@ -85,16 +85,78 @@ jobs:
             ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-
 
       - name: prepare container
+        if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
         run: /bin/sh ./bin/prepare-build
 
       - name: build package
+        if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
         env:
           FORCE_BUILD: ${{ github.event.inputs.FORCE_BUILD }}
           ONE_PACKAGE:  ${{ github.event.inputs.ONE_PACKAGE }}
         run: /bin/sh ./bin/build-package ${{ matrix.script }}.sh
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ format('{0}-{1}', matrix.script, matrix.arch) }}
+          path: "dist"
+
+  # foreign arches run through qemu user emulation, only the packages that
+  # are confirmed to build are part of the matrix for now
+  build-emulated:
+    name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
+    permissions:
+      actions: read
+      security-events: write
+      contents: write
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        script:
+          - icu-mini
+          - libxml2-mini
+          - opus-mini
+        arch: [riscv64, loongarch64, ppc64le, ppc64]
+        include:
+          - { arch: riscv64, platform: linux/riscv64 }
+          - { arch: loongarch64, platform: linux/loong64 }
+          - { arch: ppc64le, platform: linux/ppc64le }
+          - { arch: ppc64, platform: linux/ppc64 }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: set up qemu
+        if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends qemu-user-static
+
+      - name: build package
+        if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
+        env:
+          FORCE_BUILD: ${{ github.event.inputs.FORCE_BUILD }}
+          ONE_PACKAGE: ${{ github.event.inputs.ONE_PACKAGE }}
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
+          CCACHE_COMPILERCHECK: content
+          CCACHE_SLOPPINESS: time_macros,file_macro,include_file_mtime,include_file_ctime
+        run: |
+          docker run --rm --platform ${{ matrix.platform }} \
+            --cap-add=SYS_ADMIN --security-opt seccomp=unconfined \
+            -e CCACHE_DIR=/repo/.ccache -e CCACHE_COMPILERCHECK=content \
+            -e CCACHE_SLOPPINESS='time_macros,file_macro,include_file_mtime,include_file_ctime' \
+            -e FORCE_BUILD="$FORCE_BUILD" -e ONE_PACKAGE="$ONE_PACKAGE" \
+            -v "$PWD":/repo -w /repo \
+            ghcr.io/pkgforge-dev/archlinux:latest \
+            /bin/sh -euc '/bin/sh ./bin/prepare-build && /bin/sh ./bin/build-package ${{ matrix.script }}.sh'
+
+      - name: Upload artifact
+        if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ format('{0}-{1}', matrix.script, matrix.arch) }}
           path: "dist"
@@ -102,20 +164,20 @@ jobs:
   release:
     name: "release"
     if: ${{ github.ref_name == 'main' }}
-    needs: [build]
+    needs: [build, build-emulated]
     permissions:
       actions: read
       security-events: write
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: "*"
           merge-multiple: true
 
       - name: release
-        uses: softprops/action-gh-release@v3.0.0
+        uses: softprops/action-gh-release@e598afbe1493e6b1bafb1f389cabb956eab91231 # v3.0.3
         with:
           name: "Continuous build"
           tag_name: continuous

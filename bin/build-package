@@ -18,12 +18,8 @@ _cleanup() { rm -rf "$BUILD_DIR"; }
 trap _cleanup INT TERM EXIT
 
 case "$ARCH" in
-	'x86_64')  export EXT=zst;;
-	'aarch64') export EXT=xz ;;
-	*)
-		>&2 echo "Unsupported Arch: '$ARCH'"
-		exit 1
-		;;
+	aarch64) export EXT=xz ;;
+	*)       export EXT=zst;;
 esac
 
 export CMAKE_C_COMPILER_LAUNCHER=ccache
