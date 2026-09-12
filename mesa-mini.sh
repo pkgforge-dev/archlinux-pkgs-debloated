@@ -5,34 +5,69 @@ set -e
 get-pkgbuild
 cd "$BUILD_DIR"
 
-common_gallium='nouveau,radeonsi,softpipe,svga,virgl,zink'
-x64_gallium="crocus,iris,r600,$common_gallium"
-arm_gallium="asahi,freedreno,etnaviv,lima,panfrost,rocket,v3d,vc4,$common_gallium"
+common_gallium=radeonsi,softpipe,virgl,zink
+common_vulkan=amd,nouveau,virtio,gfxstream
 
-common_vulkan='amd,nouveau,virtio,gfxstream'
-x64_vulkan="intel,intel_hasvk,$common_vulkan"
-arm_vulkan="asahi,broadcom,freedreno,panfrost,imagination,$common_vulkan"
+# drivers to build per architecture
+case "$ARCH" in
+	x86_64)
+		gallium_drivers=r600,crocus,iris,nouveau,svga,$common_gallium
+		vulkan_drivers=intel,intel_hasvk,$common_vulkan
+		;;
+	aarch64)
+		gallium_drivers=asahi,freedreno,etnaviv,lima,panfrost,v3d,vc4,nouveau,$common_gallium
+		vulkan_drivers=asahi,broadcom,freedreno,panfrost,imagination,$common_vulkan
+		;;
+	riscv64|loongarch64)
+		gallium_drivers=$common_gallium
+		vulkan_drivers=
+		;;
+	ppc64le)
+		gallium_drivers=r600,nouveau,$common_gallium
+		vulkan_drivers=
+		;;
+	ppc64)
+		gallium_drivers=r300,r600,$common_gallium
+		vulkan_drivers=
+		;;
+esac
 
-# remove aarch64 drivers from x86_64
-if [ "$ARCH" = 'x86_64' ]; then
-	delete-func vulkan-freedreno vulkan-asahi vulkan-broadcom vulkan-panfrost vulkan-powervr
-	sed -i \
-		-e '/_pick vkfdreno/d'    \
-		-e '/_pick vkasahi/d'     \
-		-e '/_pick vkbrcom/d'     \
-		-e '/_pick vkpfrost/d'    \
-		-e '/_pick vkpowrvr/d'    \
-		-e "s|gallium-drivers=.*|gallium-drivers=$x64_gallium|" \
-		-e "s|vulkan-drivers=.*|vulkan-drivers=$x64_vulkan|"    \
-		"$PKGBUILD"
-elif [ "$ARCH" = 'aarch64' ]; then
-	delete-func vulkan-intel
-	sed -i \
-		-e '/_pick vkintel/d' \
-		-e "s|gallium-drivers=.*|gallium-drivers=$arm_gallium|" \
-		-e "s|vulkan-drivers=.*|vulkan-drivers=$arm_vulkan|"    \
-		"$PKGBUILD"
-fi
+# drop the drivers and packages that don't belong to the target architecture
+case "$ARCH" in
+	x86_64)
+		delete-func vulkan-freedreno vulkan-asahi vulkan-broadcom vulkan-panfrost vulkan-powervr
+		sed -i \
+			-e '/_pick vkfdreno/d'    \
+			-e '/_pick vkasahi/d'     \
+			-e '/_pick vkbrcom/d'     \
+			-e '/_pick vkpfrost/d'    \
+			-e '/_pick vkpowrvr/d'    \
+			-e "s|gallium-drivers=.*|gallium-drivers=$gallium_drivers|" \
+			-e "s|vulkan-drivers=.*|vulkan-drivers=$vulkan_drivers|"    \
+			"$PKGBUILD"
+		;;
+	aarch64)
+		delete-func vulkan-intel
+		sed -i \
+			-e '/_pick vkintel/d' \
+			-e "s|gallium-drivers=.*|gallium-drivers=$gallium_drivers|" \
+			-e "s|vulkan-drivers=.*|vulkan-drivers=$vulkan_drivers|"    \
+			"$PKGBUILD"
+		;;
+	riscv64|loongarch64|ppc64le|ppc64)
+		# the ported arches can only build libgallium, there are no vulkan drivers
+		delete-func opencl-mesa vulkan-asahi vulkan-broadcom vulkan-dzn \
+			vulkan-freedreno vulkan-gfxstream vulkan-intel vulkan-nouveau \
+			vulkan-panfrost vulkan-powervr vulkan-radeon vulkan-swrast \
+			vulkan-virtio vulkan-mesa-implicit-layers vulkan-mesa-layers
+		sed -i \
+			-e '/_pick vk/d'     \
+			-e '/_pick opencl/d' \
+			-e "s|gallium-drivers=.*|gallium-drivers=$gallium_drivers|" \
+			-e "s|vulkan-drivers=.*|vulkan-drivers=$vulkan_drivers|" \
+			"$PKGBUILD"
+		;;
+esac
 
 # debloat package, remove software rast, remove ancient drivers, build without linking to llvm
 delete-func vulkan-swrast vulkan-kosmickrisp opencl-mesa vulkan-dzn
@@ -91,19 +126,26 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
-mv -v ./mesa-*.pkg.tar."$EXT"           ../mesa-mini-"$ARCH".pkg.tar."$EXT"
-mv -v ./vulkan-radeon-*.pkg.tar."$EXT"  ../vulkan-radeon-mini-"$ARCH".pkg.tar."$EXT"
-mv -v ./vulkan-nouveau-*.pkg.tar."$EXT" ../vulkan-nouveau-mini-"$ARCH".pkg.tar."$EXT"
-mv -v ./vulkan-virtio-*.pkg.tar."$EXT"  ../vulkan-virtio-mini-"$ARCH".pkg.tar."$EXT"
+mv -v ./mesa-*.pkg.tar."$EXT" ../mesa-mini-"$ARCH".pkg.tar."$EXT"
 
-if [ "$ARCH" = 'x86_64' ]; then
-	mv -v ./vulkan-intel-*.pkg.tar."$EXT" ../vulkan-intel-mini-"$ARCH".pkg.tar."$EXT"
-elif [ "$ARCH" = 'aarch64' ]; then
-	mv -v ./vulkan-broadcom-*.pkg.tar."$EXT"  ../vulkan-broadcom-mini-"$ARCH".pkg.tar."$EXT"
-	mv -v ./vulkan-panfrost-*.pkg.tar."$EXT"  ../vulkan-panfrost-mini-"$ARCH".pkg.tar."$EXT"
-	mv -v ./vulkan-freedreno-*.pkg.tar."$EXT" ../vulkan-freedreno-mini-"$ARCH".pkg.tar."$EXT"
-	mv -v ./vulkan-asahi-*.pkg.tar."$EXT"     ../vulkan-asahi-mini-"$ARCH".pkg.tar."$EXT"
-	mv -v ./vulkan-powervr-*.pkg.tar."$EXT"   ../vulkan-powervr-mini-"$ARCH".pkg.tar."$EXT"
-fi
+# the ported arches build no vulkan drivers
+case "$ARCH" in
+	x86_64)
+		mv -v ./vulkan-radeon-*.pkg.tar."$EXT"  ../vulkan-radeon-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-nouveau-*.pkg.tar."$EXT" ../vulkan-nouveau-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-virtio-*.pkg.tar."$EXT"  ../vulkan-virtio-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-intel-*.pkg.tar."$EXT"   ../vulkan-intel-mini-"$ARCH".pkg.tar."$EXT"
+		;;
+	aarch64)
+		mv -v ./vulkan-radeon-*.pkg.tar."$EXT"  ../vulkan-radeon-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-nouveau-*.pkg.tar."$EXT" ../vulkan-nouveau-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-virtio-*.pkg.tar."$EXT"  ../vulkan-virtio-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-broadcom-*.pkg.tar."$EXT"  ../vulkan-broadcom-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-panfrost-*.pkg.tar."$EXT"  ../vulkan-panfrost-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-freedreno-*.pkg.tar."$EXT" ../vulkan-freedreno-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-asahi-*.pkg.tar."$EXT"     ../vulkan-asahi-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-powervr-*.pkg.tar."$EXT"   ../vulkan-powervr-mini-"$ARCH".pkg.tar."$EXT"
+		;;
+esac
 
 echo "All done!"
