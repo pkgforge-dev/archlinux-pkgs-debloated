@@ -5,20 +5,20 @@
 
 set -e
 
+# Comparing versions on the ported arches is unreliable (their repos lag
+# behind or don't carry the package), so always build them
+case "$ARCH" in
+	riscv64|loongarch64|ppc64*)
+		>&2 echo "Building regardless of version mismatch for $ARCH"
+		>&2 echo "----------------------------------------------------------------"
+		exit 0
+		;;
+esac
+
 pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' "$PKGBUILD")
 pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' "$PKGBUILD")
 CURRENT_VERSION="$pkgver"-"$pkgrel"
-if [ "$ARCH" = 'x86_64' ] || [ "$ARCH" = 'aarch64' ]; then
-	UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
-else
-	# the port repos lag behind arch (riscv64 mesa is months behind),
-	# compare against the arch repos instead via the package API so the
-	# packages build at mainline pace
-	API_JSON=$(curl -s "https://archlinux.org/packages/search/json/?name=$PACKAGE")
-	API_VER=$(echo "$API_JSON" | grep -o '"pkgver":"[^"]*"' | head -1 | cut -d'"' -f4)
-	API_REL=$(echo "$API_JSON" | grep -o '"pkgrel":[0-9]*' | head -1 | grep -o '[0-9]*')
-	UPSTREAM_VERSION="$API_VER-$API_REL"
-fi
+UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 
 echo "----------------------------------------------------------------"
 echo "PKGBUILD version: $CURRENT_VERSION"
