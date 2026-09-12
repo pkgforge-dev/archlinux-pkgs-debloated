@@ -1,5 +1,5 @@
 self-hosted-runner:
   labels:
     - blacksmith-8vcpu-ubuntu-2404
-    - blacksmith-8vcpu-ubuntu-2404-arm
-    - blacksmith-16vcpu-ubuntu-2404
+    - blacksmith-32vcpu-ubuntu-2404
+    - blacksmith-32vcpu-ubuntu-2404-arm

@@ -63,7 +63,7 @@ jobs:
           - arch: aarch64
             platform: linux/arm64
             runs-on: ubuntu-24.04-arm
-            blacksmith-runs-on: blacksmith-8vcpu-ubuntu-2404-arm
+            blacksmith-runs-on: blacksmith-32vcpu-ubuntu-2404-arm
         exclude:
           - arch: aarch64
             script: intel-media-driver-mini
@@ -129,7 +129,7 @@ jobs:
       actions: read
       security-events: write
       contents: write
-    runs-on: blacksmith-16vcpu-ubuntu-2404
+    runs-on: blacksmith-32vcpu-ubuntu-2404
     continue-on-error: true
     strategy:
       fail-fast: false
