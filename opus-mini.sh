@@ -15,6 +15,14 @@ sed -i \
 # skip tests since they take too long
 sed -i -e 's|meson test -C build|echo "skipped" #meson test -C build|' "$PKGBUILD"
 
+# the ported arches have no intrinsics or rtcd support in opus meson.build
+case "$ARCH" in
+	'x86_64'|'aarch64') : ;;
+	*)
+		sed -i -e 's|arch-meson opus build|arch-meson opus build -D intrinsics=disabled -D rtcd=disabled|' "$PKGBUILD"
+		;;
+esac
+
 cat "$PKGBUILD"
 
 # Do not build if version does not match with upstream
