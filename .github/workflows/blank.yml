@@ -136,9 +136,7 @@ jobs:
 
       - name: set up qemu
         if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends qemu-user-static
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
 
       - name: build package
         if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
