@@ -169,6 +169,15 @@ jobs:
             grep -q enabled "/proc/sys/fs/binfmt_misc/qemu-$emu"
           done
 
+      - name: set up ccache
+        if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-
+
       - name: build package
         if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
         env:
