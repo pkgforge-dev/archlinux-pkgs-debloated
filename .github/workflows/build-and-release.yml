@@ -23,6 +23,7 @@ jobs:
       actions: read
       security-events: write
       contents: write
+      packages: read
     # blacksmith is only used for the emulated job below
     runs-on: ${{ matrix.runs-on }}
     continue-on-error: true
@@ -65,7 +66,7 @@ jobs:
           - arch: aarch64
             script: intel-media-driver-mini
     container:
-      image: ghcr.io/pkgforge-dev/archlinux:latest
+      image: ghcr.io/pkgforge-dev/archlinux-builder:${{ matrix.arch }}
       options: --cap-add=SYS_ADMIN --security-opt seccomp=unconfined
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -126,6 +127,7 @@ jobs:
       actions: read
       security-events: write
       contents: write
+      packages: read
     runs-on: blacksmith-32vcpu-ubuntu-2404
     continue-on-error: true
     strategy:
@@ -169,6 +171,24 @@ jobs:
             grep -q enabled "/proc/sys/fs/binfmt_misc/qemu-$emu"
           done
 
+      - name: set up ccache
+        if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-
+
+      # a package first pushed by GITHUB_TOKEN is private, so authenticate the
+      # raw `docker run` pull below (the native job pulls via its container: config)
+      - name: login to ghcr
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: build package
         if: ${{ github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE) }}
         env:
@@ -184,7 +204,7 @@ jobs:
             -e CCACHE_SLOPPINESS='time_macros,file_macro,include_file_mtime,include_file_ctime' \
             -e FORCE_BUILD="$FORCE_BUILD" -e ONE_PACKAGE="$ONE_PACKAGE" \
             -v "$PWD":/repo -w /repo \
-            ghcr.io/pkgforge-dev/archlinux:latest \
+            ghcr.io/pkgforge-dev/archlinux-builder:${{ matrix.arch }} \
             /bin/sh -euc '/bin/sh ./bin/prepare-build && /bin/sh ./bin/build-package ${{ matrix.script }}.sh'
 
       - name: Upload artifact
