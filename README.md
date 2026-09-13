@@ -58,7 +58,19 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 Build jobs run inside `ghcr.io/pkgforge-dev/archlinux-builder:<arch>`, an image
 that bakes in `base-devel`, `ccache`, `clang`, `cmake`, `curl`, `git`, `mold`,
-`ninja` and `wget` plus the initialized pacman keyring, so the matrix no longer
-spends ~5 minutes per leg on `pacman -Syu`. The image is built per arch by the
-`build builder image` workflow and refreshed weekly; run it manually once before
-the first build, or whenever the `Dockerfile` changes.
+`ninja` and `wget` plus the initialized pacman keyring. The real wins are the
+foreign-arch (qemu) legs on blacksmith, which cache images by digest, and
+keeping the toolchain in one place instead of installing it per job. On the
+GitHub-hosted native legs the ~2 GB image is pulled fresh on every job, so wall
+time there is roughly a wash versus installing the toolchain.
+
+The image is built per arch by the `build builder image` workflow and refreshed
+weekly, so its package database can be up to a week old; `prepare-build` falls
+back to the old `pacman -Syu` install when the toolchain is missing, which also
+keeps the workflow usable with a plain `ghcr.io/pkgforge-dev/archlinux` base.
+
+Run `build builder image` manually once before the first build after merging
+(and whenever the `Dockerfile` changes). That first run pushes the package as
+private; the build jobs have `packages: read` and `build-emulated` logs in to
+ghcr, so they can still pull it. Making the package public in its settings is
+optional but matches the other pkgforge images.

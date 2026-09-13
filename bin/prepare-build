@@ -13,6 +13,9 @@ done
 if [ -n "$_install" ]; then
 	echo "Installing basic packages..."
 	pacman-key --init
+	# ArchPOWER's `archpower-keyring` (in `base/any`) provides and replaces
+	# `archlinux-keyring`, so the install below is just a no-op reinstall on
+	# ppc64/ppc64le; skip it on those arches
 	case "$(uname -m)" in
 		ppc64|ppc64le) : ;;
 		*) pacman -Syy --noconfirm archlinux-keyring ;;
