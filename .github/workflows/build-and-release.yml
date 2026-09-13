@@ -65,7 +65,7 @@ jobs:
           - arch: aarch64
             script: intel-media-driver-mini
     container:
-      image: ghcr.io/pkgforge-dev/archlinux:latest
+      image: ghcr.io/pkgforge-dev/archlinux-builder:${{ matrix.arch }}
       options: --cap-add=SYS_ADMIN --security-opt seccomp=unconfined
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -184,7 +184,7 @@ jobs:
             -e CCACHE_SLOPPINESS='time_macros,file_macro,include_file_mtime,include_file_ctime' \
             -e FORCE_BUILD="$FORCE_BUILD" -e ONE_PACKAGE="$ONE_PACKAGE" \
             -v "$PWD":/repo -w /repo \
-            ghcr.io/pkgforge-dev/archlinux:latest \
+            ghcr.io/pkgforge-dev/archlinux-builder:${{ matrix.arch }} \
             /bin/sh -euc '/bin/sh ./bin/prepare-build && /bin/sh ./bin/build-package ${{ matrix.script }}.sh'
 
       - name: Upload artifact

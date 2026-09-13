@@ -1,0 +1,66 @@
+---
+name: build builder image
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - .github/workflows/build-builder-image.yml
+  schedule:
+    - cron: "0 1 1/7 * *"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    name: "Image: ${{ matrix.arch }}"
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: x86_64, platform: linux/amd64, runs-on: ubuntu-24.04 }
+          - { arch: aarch64, platform: linux/arm64, runs-on: ubuntu-24.04-arm }
+          - { arch: riscv64, platform: linux/riscv64, runs-on: ubuntu-24.04 }
+          - { arch: loongarch64, platform: linux/loong64, runs-on: ubuntu-24.04 }
+          - { arch: ppc64le, platform: linux/ppc64le, runs-on: ubuntu-24.04 }
+          - { arch: ppc64, platform: linux/ppc64, runs-on: ubuntu-24.04 }
+    env:
+      ARCH: ${{ matrix.arch }}
+      PLATFORM: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: set up qemu
+        if: ${{ matrix.arch != 'x86_64' && matrix.arch != 'aarch64' }}
+        run: |
+          if ! mountpoint -q /proc/sys/fs/binfmt_misc; then
+            sudo modprobe binfmt_misc || true
+            sudo mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
+          fi
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends qemu-user-static
+          sudo systemctl restart systemd-binfmt 2>/dev/null || sudo /usr/lib/systemd/systemd-binfmt 2>/dev/null || true
+          grep -q enabled "/proc/sys/fs/binfmt_misc/qemu-$ARCH"
+
+      - name: login to ghcr
+        run: echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: build and push
+        env:
+          DOCKER_BUILDKIT: "1"
+        run: |
+          img="ghcr.io/$GITHUB_REPOSITORY_OWNER/archlinux-builder:$ARCH"
+          cache="ghcr.io/$GITHUB_REPOSITORY_OWNER/archlinux-builder:cache-$ARCH"
+          docker build --platform "$PLATFORM" \
+            --cache-from "type=registry,ref=$cache" \
+            --cache-to "type=registry,ref=$cache" \
+            -t "$img" .
+          docker push "$img"

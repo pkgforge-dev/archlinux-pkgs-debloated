@@ -53,3 +53,12 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 * [ppsspp](https://github.com/hrydgard/ppsspp)
 
 * [Eden](https://github.com/eden-emulator/Releases)
+
+# CI
+
+Build jobs run inside `ghcr.io/pkgforge-dev/archlinux-builder:<arch>`, an image
+that bakes in `base-devel`, `ccache`, `clang`, `cmake`, `curl`, `git`, `mold`,
+`ninja` and `wget` plus the initialized pacman keyring, so the matrix no longer
+spends ~5 minutes per leg on `pacman -Syu`. The image is built per arch by the
+`build builder image` workflow and refreshed weekly; run it manually once before
+the first build, or whenever the `Dockerfile` changes.
