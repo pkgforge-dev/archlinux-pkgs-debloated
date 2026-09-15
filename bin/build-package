@@ -10,6 +10,8 @@ SCRIPT="$1"
 PACKAGE="${SCRIPT##*/}"
 PACKAGE="${PACKAGE%-mini.sh}"
 PACKAGE="${PACKAGE%-nano.sh}"
+BUILD_SCRIPT="${SCRIPT%.sh}"
+export BUILD_SCRIPT
 export PACKAGE
 export BUILD_DIR="$PWD"/tmpbuild
 export PKGBUILD="$BUILD_DIR"/PKGBUILD
@@ -28,10 +30,9 @@ export CMAKE_CXX_COMPILER_LAUNCHER=ccache
 export PATH="$PWD:$PWD/bin:$PATH:/usr/bin/core_perl"
 chmod +x "$PWD"/bin/* "$PWD"/*.sh
 
-if [ "$FORCE_BUILD" = "1" ]; then
-	echo "Forcing build!"
-	echo "Packages will be built and released regardless of version mismatch"
-fi
+case "$FORCE_BUILD" in
+	1|2|3) echo "Forcing build! (FORCE_BUILD=$FORCE_BUILD)";;
+esac
 
 if [ -n "$ONE_PACKAGE" ] && [ "$ONE_PACKAGE" != "$PACKAGE" ]; then
 	>&2 echo "ONE_PACKAGE is set to '$ONE_PACKAGE'"
@@ -52,21 +53,25 @@ while :; do
 		break
 	else
 		rm -rf "$BUILD_DIR"
+		COUNT=$(( COUNT + 1))
+		if [ "$COUNT" -ge 2 ]; then
+			>&2 echo "----------------------------------------"
+			>&2 echo "Failed to build package 2 times"
+			>&2 echo "----------------------------------------"
+			exit 1
+		fi
 		>&2 echo "----------------------------------------"
 		>&2 echo "Failed to build package, trying again..."
 		>&2 echo "----------------------------------------"
-		COUNT=$(( COUNT + 1))
-	fi
-	if [ "$COUNT" -ge 3 ]; then
-		>&2 echo "----------------------------------------"
-		>&2 echo "Failed to build package 3 times"
-		>&2 echo "----------------------------------------"
-		exit 1
+		sleep 60
 	fi
 done
 
 ccache -s -v
 
 mkdir ./dist
+pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' "$PKGBUILD")
+pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' "$PKGBUILD")
+echo "$pkgver-$pkgrel" > "./dist/$BUILD_SCRIPT-$ARCH.pkgver"
 sha256sum ./*.pkg.tar.*
 mv ./*.pkg.tar.* ./dist
