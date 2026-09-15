@@ -15,6 +15,6 @@ makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.* ./*-demos-*.pkg.tar.*
-mv -v ./"$AUR_PACKAGE"-*.pkg.tar."$EXT" ../"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT"
+mv -v ./"$AUR_PACKAGE"-*.pkg.tar.zst ../"$PACKAGE"-mini-"$ARCH".pkg.tar.zst
 
 echo "All done!"

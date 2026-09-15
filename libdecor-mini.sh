@@ -15,6 +15,6 @@ makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
-mv -v ./libdecor-rs-*.pkg.tar."$EXT" ../"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT"
+mv -v ./libdecor-rs-*.pkg.tar.zst ../"$PACKAGE"-mini-"$ARCH".pkg.tar.zst
 
 echo "All done!"

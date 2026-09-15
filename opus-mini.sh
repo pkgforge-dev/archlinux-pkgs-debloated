@@ -34,8 +34,8 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* *-debug-*.pkg.tar.*
-mv -v ./"$PACKAGE"-*.pkg.tar."$EXT" ../"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT"
+mv -v ./"$PACKAGE"-*.pkg.tar.zst ../"$PACKAGE"-mini-"$ARCH".pkg.tar.zst
 cd ..
 # keep older name to not break existing CIs
-cp -v ./"$PACKAGE"-mini-"$ARCH".pkg.tar."$EXT" ./"$PACKAGE"-nano-"$ARCH".pkg.tar."$EXT"
+cp -v ./"$PACKAGE"-mini-"$ARCH".pkg.tar.zst ./"$PACKAGE"-nano-"$ARCH".pkg.tar.zst
 echo "All done!"
