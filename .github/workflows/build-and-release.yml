@@ -13,7 +13,7 @@ on:
         required: false
         default: ''
       FORCE_BUILD:
-        description: 'Normal runs leave this at 0. 1 = build even if this version is already released, 2 = build even if the upstream version does not match (dangerous), 3 = both'
+        description: 'Do not set unless you need to: 1 = build even if this version is already released, 2 = build even if the upstream version does not match (dangerous), 3 = both'
         required: false
         default: '0'
 jobs:
