@@ -14,10 +14,10 @@ RELEASED_VERSION=$(wget -qO- --retry-connrefused --tries=10 \
 	"https://github.com/${GITHUB_REPOSITORY:-pkgforge-dev/archlinux-pkgs-debloated}/releases/download/continuous/$BUILD_SCRIPT-$ARCH.pkgver") || :
 
 case "$FORCE_BUILD" in
-	1) FORCE_RELEASED=1; FORCE_UPSTREAM=0;;
-	2) FORCE_RELEASED=0; FORCE_UPSTREAM=1;;
-	3) FORCE_RELEASED=1; FORCE_UPSTREAM=1;;
-	*) FORCE_RELEASED=0; FORCE_UPSTREAM=0;;
+	1) FORCE_RELEASED=1; FORCE_UPSTREAM=0;; # build even if already released
+	2) FORCE_RELEASED=0; FORCE_UPSTREAM=1;; # build even if upstream does not match
+	3) FORCE_RELEASED=1; FORCE_UPSTREAM=1;; # build even if both
+	*) FORCE_RELEASED=0; FORCE_UPSTREAM=0;; # normal, no override
 esac
 
 echo "----------------------------------------------------------------"
