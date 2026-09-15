@@ -8,6 +8,7 @@ export CXX=g++
 
 SCRIPT="$1"
 PACKAGE="${SCRIPT##*/}"
+export BUILD_SCRIPT="${PACKAGE%.sh}"
 PACKAGE="${PACKAGE%-mini.sh}"
 PACKAGE="${PACKAGE%-nano.sh}"
 export PACKAGE
@@ -28,10 +29,9 @@ export CMAKE_CXX_COMPILER_LAUNCHER=ccache
 export PATH="$PWD:$PWD/bin:$PATH:/usr/bin/core_perl"
 chmod +x "$PWD"/bin/* "$PWD"/*.sh
 
-if [ "$FORCE_BUILD" = "1" ]; then
-	echo "Forcing build!"
-	echo "Packages will be built and released regardless of version mismatch"
-fi
+case "$FORCE_BUILD" in
+	1|2|3) echo "Forcing build! (FORCE_BUILD=$FORCE_BUILD)";;
+esac
 
 if [ -n "$ONE_PACKAGE" ] && [ "$ONE_PACKAGE" != "$PACKAGE" ]; then
 	>&2 echo "ONE_PACKAGE is set to '$ONE_PACKAGE'"
@@ -69,5 +69,8 @@ done
 ccache -s -v
 
 mkdir ./dist
+pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' "$PKGBUILD")
+pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' "$PKGBUILD")
+echo "$pkgver-$pkgrel" > "./dist/$BUILD_SCRIPT-$ARCH.pkgver"
 sha256sum ./*.pkg.tar.*
 mv ./*.pkg.tar.* ./dist

@@ -13,7 +13,7 @@ on:
         required: false
         default: ''
       FORCE_BUILD:
-        description: 'Set to 1 to force building even if version does not match with upstream'
+        description: '1 = build even if this version is already released, 2 = build even if the upstream version does not match (dangerous), 3 = both'
         required: false
         default: '0'
 jobs:
@@ -118,6 +118,7 @@ jobs:
           files: |
             dist/*.pkg.tar.zst
             dist/*.pkg.tar.xz
+            dist/*.pkgver
 
   # foreign arches run through qemu user emulation, only the packages that
   # are confirmed to build are part of the matrix for now
@@ -203,6 +204,7 @@ jobs:
             -e CCACHE_DIR=/repo/.ccache -e CCACHE_COMPILERCHECK=content \
             -e CCACHE_SLOPPINESS='time_macros,file_macro,include_file_mtime,include_file_ctime' \
             -e FORCE_BUILD="$FORCE_BUILD" -e ONE_PACKAGE="$ONE_PACKAGE" \
+            -e GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
             -v "$PWD":/repo -w /repo \
             ghcr.io/pkgforge-dev/archlinux-builder:${{ matrix.arch }} \
             /bin/sh -euc '/bin/sh ./bin/prepare-build && /bin/sh ./bin/build-package ${{ matrix.script }}.sh'
@@ -228,3 +230,4 @@ jobs:
           files: |
             dist/*.pkg.tar.zst
             dist/*.pkg.tar.xz
+            dist/*.pkgver

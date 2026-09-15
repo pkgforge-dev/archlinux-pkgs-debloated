@@ -1,9 +1,40 @@
 #!/bin/sh
 
-# This script compares the version of the PKGBUILD with the upstream version
-# This is to avoid pushing packages that are too new causing partial updates as result
+# This script compares the version of the PKGBUILD with the version that was
+# already released, and with the upstream version. This is to avoid rebuilding a
+# package that is already released and to avoid pushing packages that are too
+# new causing partial updates as result
 
 set -e
+
+pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' "$PKGBUILD")
+pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' "$PKGBUILD")
+CURRENT_VERSION="$pkgver"-"$pkgrel"
+RELEASED_VERSION=$(wget -qO- --retry-connrefused --tries=10 \
+	"https://github.com/${GITHUB_REPOSITORY:-pkgforge-dev/archlinux-pkgs-debloated}/releases/download/continuous/$BUILD_SCRIPT-$ARCH.pkgver") || :
+
+case "$FORCE_BUILD" in
+	1) FORCE_RELEASED=1; FORCE_UPSTREAM=0;;
+	2) FORCE_RELEASED=0; FORCE_UPSTREAM=1;;
+	3) FORCE_RELEASED=1; FORCE_UPSTREAM=1;;
+	*) FORCE_RELEASED=0; FORCE_UPSTREAM=0;;
+esac
+
+echo "----------------------------------------------------------------"
+echo "PKGBUILD version: $CURRENT_VERSION"
+echo "RELEASED version: ${RELEASED_VERSION:-none}"
+if [ "$FORCE_RELEASED" = 1 ]; then
+	echo "FORCE_BUILD=$FORCE_BUILD, ignoring the released version..."
+	echo "----------------------------------------------------------------"
+elif [ -n "$RELEASED_VERSION" ] && [ "$RELEASED_VERSION" = "$CURRENT_VERSION" ]; then
+	>&2 echo "ABORTING BUILD BECAUSE THIS VERSION IS ALREADY RELEASED!"
+	>&2 echo "----------------------------------------------------------------"
+	:> ~/OPERATION_ABORTED
+	exit 1
+else
+	echo "Version differs from the released one, continuing..."
+	echo "----------------------------------------------------------------"
+fi
 
 # Comparing versions on the ported arches is unreliable (their repos lag
 # behind or don't carry the package), so always build them
@@ -15,24 +46,16 @@ case "$ARCH" in
 		;;
 esac
 
-pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' "$PKGBUILD")
-pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' "$PKGBUILD")
-CURRENT_VERSION="$pkgver"-"$pkgrel"
 UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 
-echo "----------------------------------------------------------------"
-echo "PKGBUILD version: $CURRENT_VERSION"
 echo "UPSTREAM version: $UPSTREAM_VERSION"
-if [ "$FORCE_BUILD" = 1 ]; then
-	echo "FORCE_BUILD is set to 1. BUILDING PACKAGE REGARDLESS!"
-	echo "----------------------------------------------------------------"
+if [ "$FORCE_UPSTREAM" = 1 ]; then
+	echo "FORCE_BUILD=$FORCE_BUILD, ignoring the upstream version..."
 elif [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
 	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
 	>&2 echo "----------------------------------------------------------------"
 	:> ~/OPERATION_ABORTED
 	exit 1
-else
-	echo "Versions match, building package..."
-	echo "----------------------------------------------------------------"
 fi
-
+echo "Building package..."
+echo "----------------------------------------------------------------"
