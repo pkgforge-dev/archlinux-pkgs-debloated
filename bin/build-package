@@ -8,9 +8,10 @@ export CXX=g++
 
 SCRIPT="$1"
 PACKAGE="${SCRIPT##*/}"
-export BUILD_SCRIPT="${PACKAGE%.sh}"
 PACKAGE="${PACKAGE%-mini.sh}"
 PACKAGE="${PACKAGE%-nano.sh}"
+BUILD_SCRIPT="${SCRIPT%.sh}"
+export BUILD_SCRIPT
 export PACKAGE
 export BUILD_DIR="$PWD"/tmpbuild
 export PKGBUILD="$BUILD_DIR"/PKGBUILD
