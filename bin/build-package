@@ -52,16 +52,17 @@ while :; do
 		break
 	else
 		rm -rf "$BUILD_DIR"
+		COUNT=$(( COUNT + 1))
+		if [ "$COUNT" -ge 2 ]; then
+			>&2 echo "----------------------------------------"
+			>&2 echo "Failed to build package 2 times"
+			>&2 echo "----------------------------------------"
+			exit 1
+		fi
 		>&2 echo "----------------------------------------"
 		>&2 echo "Failed to build package, trying again..."
 		>&2 echo "----------------------------------------"
-		COUNT=$(( COUNT + 1))
-	fi
-	if [ "$COUNT" -ge 3 ]; then
-		>&2 echo "----------------------------------------"
-		>&2 echo "Failed to build package 3 times"
-		>&2 echo "----------------------------------------"
-		exit 1
+		sleep 60
 	fi
 done
 
