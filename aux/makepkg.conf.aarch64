@@ -41,7 +41,7 @@ PURGE_TARGETS=(usr/{,share}/info/dir .packlist *.pod)
 DBGSRCDIR="/usr/src/debug"
 LIB_DIRS=('lib:usr/lib')
 
-PKGEXT='.pkg.tar.xz'
+PKGEXT='.pkg.tar.zst'
 SRCEXT='.src.tar.gz'
 
 COMPRESSGZ=(gzip -c -f -n)
