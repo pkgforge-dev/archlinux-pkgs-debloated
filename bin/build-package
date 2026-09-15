@@ -19,8 +19,6 @@ export PKGBUILD="$BUILD_DIR"/PKGBUILD
 _cleanup() { rm -rf "$BUILD_DIR"; }
 trap _cleanup INT TERM EXIT
 
-export EXT=zst
-
 export CMAKE_C_COMPILER_LAUNCHER=ccache
 export CMAKE_CXX_COMPILER_LAUNCHER=ccache
 
