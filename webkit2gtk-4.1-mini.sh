@@ -4,6 +4,13 @@ set -e
 
 sed -i -e 's|-fexceptions|-fno-exceptions -fno-asynchronous-unwind-tables|' /etc/makepkg.conf
 
+# this build is huge, cap the parallel jobs to keep peak memory down on the
+# 4-core/16 GB GitHub runners (a cold build was killing the runner). The
+# PKGBUILD builds with `cmake --build` + Ninja, so the job count comes from
+# CMAKE_BUILD_PARALLEL_LEVEL; MAKEFLAGS is set too for any make-based steps.
+export CMAKE_BUILD_PARALLEL_LEVEL=3
+sed -i -e 's|^MAKEFLAGS=.*|MAKEFLAGS="-j3"|' /etc/makepkg.conf
+
 get-pkgbuild
 cd "$BUILD_DIR"
 
