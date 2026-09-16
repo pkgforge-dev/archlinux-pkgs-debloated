@@ -20,6 +20,10 @@ on:
         description: 'Do not set unless you need to: 1 = build even if this version is already released, 2 = build even if the upstream version does not match (dangerous), 3 = both'
         required: false
         default: '0'
+      SKIP_EMULATED:
+        description: 'Set to 1 to skip the emulated architectures (riscv64, loongarch64, ppc64le, ppc64) and only build x86_64/aarch64'
+        required: false
+        default: '0'
 jobs:
   build:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
@@ -128,7 +132,7 @@ jobs:
   # are confirmed to build are part of the matrix for now
   build-emulated:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
-    if: ${{ github.event.inputs.ARCH == '' || (github.event.inputs.ARCH != 'x86_64' && github.event.inputs.ARCH != 'aarch64') }}
+    if: ${{ github.event.inputs.SKIP_EMULATED != '1' && (github.event.inputs.ARCH == '' || (github.event.inputs.ARCH != 'x86_64' && github.event.inputs.ARCH != 'aarch64')) }}
     permissions:
       actions: read
       security-events: write
