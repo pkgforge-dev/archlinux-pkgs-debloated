@@ -7,7 +7,14 @@ FROM ghcr.io/pkgforge-dev/archlinux:latest
 # ArchPOWER (ppc64/ppc64le) publishes `archpower-keyring` (in `base/any`), which
 # provides and replaces `archlinux-keyring`; asking for `archlinux-keyring` on
 # those arches only reinstalls it, so skip that no-op there.
-RUN sed -i 's|^#\?ParallelDownloads.*|ParallelDownloads = 20|' /etc/pacman.conf && \
+#
+# BuildKit caches this layer on the instruction text alone, so without a value
+# that changes on every build the `pacman -Syu` below would only ever run on the
+# very first build, leaving the baked package database stale. The workflow
+# passes the run id as CACHE_BUST to force it to re-run.
+ARG CACHE_BUST=0
+RUN echo "cache bust: $CACHE_BUST" && \
+	sed -i 's|^#\?ParallelDownloads.*|ParallelDownloads = 20|' /etc/pacman.conf && \
 	pacman-key --init && \
 	([ "$(uname -m)" = ppc64 ] || [ "$(uname -m)" = ppc64le ] || pacman -Syy --noconfirm archlinux-keyring) && \
 	pacman -Syu --needed --noconfirm \

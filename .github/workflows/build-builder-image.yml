@@ -65,5 +65,10 @@ jobs:
           platforms: ${{ matrix.platform }}
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/archlinux-builder:${{ matrix.arch }}
+          # force the `pacman -Syu` layer to actually re-run, otherwise BuildKit
+          # reuses it from cache and the baked package database goes stale
+          # (https://github.com/pkgforge-dev/archlinux-pkgs-debloated/actions/runs/35068577544)
+          build-args: |
+            CACHE_BUST=${{ github.run_id }}
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/archlinux-builder:cache-${{ matrix.arch }}
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/archlinux-builder:cache-${{ matrix.arch }},mode=max
