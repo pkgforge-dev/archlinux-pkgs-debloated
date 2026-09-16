@@ -24,6 +24,10 @@ on:
         description: 'Set to 1 to skip the emulated architectures (riscv64, loongarch64, ppc64le, ppc64) and only build x86_64/aarch64'
         required: false
         default: '0'
+      EMULATED_RUNNER:
+        description: 'Runner label used for the heavy emulated packages that stay on blacksmith'
+        required: false
+        default: 'blacksmith-32vcpu-ubuntu-2404'
 jobs:
   build:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
@@ -138,7 +142,13 @@ jobs:
       security-events: write
       contents: write
       packages: read
-    runs-on: blacksmith-32vcpu-ubuntu-2404
+    # only the heavy emulated packages stay on blacksmith to avoid qemu
+    # timeouts/OOM on the free GitHub runner; the blacksmith SKU can be
+    # overridden with the EMULATED_RUNNER input
+    runs-on: >-
+      ${{ (contains(fromJSON('["mesa-mini","mesa-nano","gtk3-mini"]'), matrix.script)
+      && (github.event.inputs.EMULATED_RUNNER || 'blacksmith-32vcpu-ubuntu-2404'))
+      || 'ubuntu-24.04' }}
     continue-on-error: true
     strategy:
       fail-fast: false
