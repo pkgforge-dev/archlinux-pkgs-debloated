@@ -126,25 +126,25 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
-mv -v ./mesa-*.pkg.tar."$EXT" ../mesa-mini-"$ARCH".pkg.tar."$EXT"
+mv -v ./mesa-*.pkg.tar.zst ../mesa-mini-"$ARCH".pkg.tar.zst
 
 # the ported arches build no vulkan drivers
 case "$ARCH" in
 	x86_64)
-		mv -v ./vulkan-radeon-*.pkg.tar."$EXT"  ../vulkan-radeon-mini-"$ARCH".pkg.tar."$EXT"
-		mv -v ./vulkan-nouveau-*.pkg.tar."$EXT" ../vulkan-nouveau-mini-"$ARCH".pkg.tar."$EXT"
-		mv -v ./vulkan-virtio-*.pkg.tar."$EXT"  ../vulkan-virtio-mini-"$ARCH".pkg.tar."$EXT"
-		mv -v ./vulkan-intel-*.pkg.tar."$EXT"   ../vulkan-intel-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-radeon-*.pkg.tar.zst  ../vulkan-radeon-mini-"$ARCH".pkg.tar.zst
+		mv -v ./vulkan-nouveau-*.pkg.tar.zst ../vulkan-nouveau-mini-"$ARCH".pkg.tar.zst
+		mv -v ./vulkan-virtio-*.pkg.tar.zst  ../vulkan-virtio-mini-"$ARCH".pkg.tar.zst
+		mv -v ./vulkan-intel-*.pkg.tar.zst   ../vulkan-intel-mini-"$ARCH".pkg.tar.zst
 		;;
 	aarch64)
-		mv -v ./vulkan-radeon-*.pkg.tar."$EXT"  ../vulkan-radeon-mini-"$ARCH".pkg.tar."$EXT"
-		mv -v ./vulkan-nouveau-*.pkg.tar."$EXT" ../vulkan-nouveau-mini-"$ARCH".pkg.tar."$EXT"
-		mv -v ./vulkan-virtio-*.pkg.tar."$EXT"  ../vulkan-virtio-mini-"$ARCH".pkg.tar."$EXT"
-		mv -v ./vulkan-broadcom-*.pkg.tar."$EXT"  ../vulkan-broadcom-mini-"$ARCH".pkg.tar."$EXT"
-		mv -v ./vulkan-panfrost-*.pkg.tar."$EXT"  ../vulkan-panfrost-mini-"$ARCH".pkg.tar."$EXT"
-		mv -v ./vulkan-freedreno-*.pkg.tar."$EXT" ../vulkan-freedreno-mini-"$ARCH".pkg.tar."$EXT"
-		mv -v ./vulkan-asahi-*.pkg.tar."$EXT"     ../vulkan-asahi-mini-"$ARCH".pkg.tar."$EXT"
-		mv -v ./vulkan-powervr-*.pkg.tar."$EXT"   ../vulkan-powervr-mini-"$ARCH".pkg.tar."$EXT"
+		mv -v ./vulkan-radeon-*.pkg.tar.zst  ../vulkan-radeon-mini-"$ARCH".pkg.tar.zst
+		mv -v ./vulkan-nouveau-*.pkg.tar.zst ../vulkan-nouveau-mini-"$ARCH".pkg.tar.zst
+		mv -v ./vulkan-virtio-*.pkg.tar.zst  ../vulkan-virtio-mini-"$ARCH".pkg.tar.zst
+		mv -v ./vulkan-broadcom-*.pkg.tar.zst  ../vulkan-broadcom-mini-"$ARCH".pkg.tar.zst
+		mv -v ./vulkan-panfrost-*.pkg.tar.zst  ../vulkan-panfrost-mini-"$ARCH".pkg.tar.zst
+		mv -v ./vulkan-freedreno-*.pkg.tar.zst ../vulkan-freedreno-mini-"$ARCH".pkg.tar.zst
+		mv -v ./vulkan-asahi-*.pkg.tar.zst     ../vulkan-asahi-mini-"$ARCH".pkg.tar.zst
+		mv -v ./vulkan-powervr-*.pkg.tar.zst   ../vulkan-powervr-mini-"$ARCH".pkg.tar.zst
 		;;
 esac
 

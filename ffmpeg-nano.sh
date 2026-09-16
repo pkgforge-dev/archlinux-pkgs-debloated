@@ -72,6 +72,6 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
-mv -v ./"$PACKAGE"-*.pkg.tar."$EXT" ../"$PACKAGE"-nano-"$ARCH".pkg.tar."$EXT"
+mv -v ./"$PACKAGE"-*.pkg.tar.zst ../"$PACKAGE"-nano-"$ARCH".pkg.tar.zst
 
 echo "All done!"

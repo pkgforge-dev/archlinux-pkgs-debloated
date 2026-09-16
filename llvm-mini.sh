@@ -30,6 +30,6 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
-mv -v ./"$PACKAGE"-libs-*.pkg.tar."$EXT" ../"$PACKAGE"-libs-mini-"$ARCH".pkg.tar."$EXT"
+mv -v ./"$PACKAGE"-libs-*.pkg.tar.zst ../"$PACKAGE"-libs-mini-"$ARCH".pkg.tar.zst
 
 echo "All done!"
