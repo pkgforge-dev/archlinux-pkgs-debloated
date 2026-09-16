@@ -46,8 +46,6 @@ jobs:
           - qt6-base-mini
           - gtk3-mini
           - gtk4-mini
-          - gdk-pixbuf2-mini
-          - librsvg-mini
           - ffmpeg-mini
           - ffmpeg-nano
           - sdl2_image-mini
