@@ -24,9 +24,7 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 * `opus-mini` I have no idea why Archlinux makes this lib 5 MiB when both ubuntu and alpine make it <500 KiB
 
-* `gdk-pixbuf2-mini`, `librsvg-mini` These remove the glycin dependency, ~20 MiB of bloat. (glycin is also super buggy and depends on `bwrap` which is problematic for running appimages in very old kernels).
-
-* `glycin-mini` Builds [`glycin-ng`](https://github.com/QaidVoid/glycin-ng), alternative to glycin that does not have the many problems that GNOME glycin has.
+* `glycin-mini` Builds [`glycin-ng`](https://github.com/QaidVoid/glycin-ng), alternative to glycin that does not have the many problems that GNOME glycin has. This replaces the old `gdk-pixbuf2-mini`/`librsvg-mini` workaround.
 
 * `icu-mini` Much smaller version of `libicudata.so` that is less than 3 MIB in size (10x reduction in size).
 

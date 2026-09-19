@@ -6,7 +6,7 @@ get-pkgbuild
 cd "$BUILD_DIR"
 
 common_gallium=radeonsi,softpipe,virgl,zink
-common_vulkan=amd,nouveau,virtio,gfxstream
+common_vulkan=amd,virtio,gfxstream
 
 # drivers to build per architecture
 case "$ARCH" in
@@ -70,11 +70,12 @@ case "$ARCH" in
 esac
 
 # debloat package, remove software rast, remove ancient drivers, build without linking to llvm
-delete-func vulkan-swrast vulkan-kosmickrisp opencl-mesa vulkan-dzn
+delete-func vulkan-swrast vulkan-kosmickrisp vulkan-nouveau opencl-mesa vulkan-dzn
 sed -i \
 	-e '/llvm-libs/d'           \
 	-e '/sysprof/d'             \
 	-e '/_pick vkswrast/d'      \
+	-e '/_pick vknvidia/d'      \
 	-e '/_pick opencl/d'        \
 	-e '/_pick vkkosmic/d'      \
 	-e '/_pick vkd3d12/d'       \
@@ -132,13 +133,11 @@ mv -v ./mesa-*.pkg.tar.zst ../mesa-mini-"$ARCH".pkg.tar.zst
 case "$ARCH" in
 	x86_64)
 		mv -v ./vulkan-radeon-*.pkg.tar.zst  ../vulkan-radeon-mini-"$ARCH".pkg.tar.zst
-		mv -v ./vulkan-nouveau-*.pkg.tar.zst ../vulkan-nouveau-mini-"$ARCH".pkg.tar.zst
 		mv -v ./vulkan-virtio-*.pkg.tar.zst  ../vulkan-virtio-mini-"$ARCH".pkg.tar.zst
 		mv -v ./vulkan-intel-*.pkg.tar.zst   ../vulkan-intel-mini-"$ARCH".pkg.tar.zst
 		;;
 	aarch64)
 		mv -v ./vulkan-radeon-*.pkg.tar.zst  ../vulkan-radeon-mini-"$ARCH".pkg.tar.zst
-		mv -v ./vulkan-nouveau-*.pkg.tar.zst ../vulkan-nouveau-mini-"$ARCH".pkg.tar.zst
 		mv -v ./vulkan-virtio-*.pkg.tar.zst  ../vulkan-virtio-mini-"$ARCH".pkg.tar.zst
 		mv -v ./vulkan-broadcom-*.pkg.tar.zst  ../vulkan-broadcom-mini-"$ARCH".pkg.tar.zst
 		mv -v ./vulkan-panfrost-*.pkg.tar.zst  ../vulkan-panfrost-mini-"$ARCH".pkg.tar.zst
