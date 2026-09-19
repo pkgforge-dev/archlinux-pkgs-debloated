@@ -146,7 +146,7 @@ jobs:
     # timeouts/OOM on the free GitHub runner; the blacksmith SKU can be
     # overridden with the EMULATED_RUNNER input
     runs-on: >-
-      ${{ (contains(fromJSON('["mesa-mini","mesa-nano","gtk3-mini"]'), matrix.script)
+      ${{ (contains(fromJSON('["mesa-mini","mesa-nano"]'), matrix.script)
       && (github.event.inputs.EMULATED_RUNNER || 'blacksmith-32vcpu-ubuntu-2404'))
       || 'ubuntu-24.04' }}
     continue-on-error: true
@@ -161,7 +161,6 @@ jobs:
           - mesa-nano
           - glycin-mini
           - libdecor-mini
-          - gtk3-mini
         arch: [riscv64, loongarch64, ppc64le, ppc64]
         include:
           - { arch: riscv64, platform: linux/riscv64 }
