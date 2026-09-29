@@ -49,6 +49,7 @@ case "$ARCH" in
 	aarch64)
 		delete-func vulkan-intel
 		sed -i \
+			-e 's/-D video-codecs=all/-D video-codecs=all -D legacy-wayland=bind-wayland-display/' \
 			-e '/_pick vkintel/d' \
 			-e "s|gallium-drivers=.*|gallium-drivers=$gallium_drivers|" \
 			-e "s|vulkan-drivers=.*|vulkan-drivers=$vulkan_drivers|"    \
