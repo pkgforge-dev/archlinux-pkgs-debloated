@@ -24,10 +24,10 @@ on:
         description: 'Set to 1 to skip the emulated architectures (riscv64, loongarch64, ppc64le, ppc64) and only build x86_64/aarch64'
         required: false
         default: '0'
-      EMULATED_RUNNER:
-        description: 'Runner label used for the heavy emulated packages that stay on blacksmith'
-        required: false
-        default: 'blacksmith-32vcpu-ubuntu-2404'
+      # EMULATED_RUNNER:
+      #   description: 'Runner label used for the heavy emulated packages that stay on blacksmith'
+      #   required: false
+      #   default: 'blacksmith-32vcpu-ubuntu-2404'
 jobs:
   build:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
@@ -37,7 +37,7 @@ jobs:
       security-events: write
       contents: write
       packages: read
-    # blacksmith is only used for the emulated job below
+    # blacksmith is only used for the (currently disabled) emulated job below
     runs-on: ${{ matrix.runs-on }}
     continue-on-error: true
     strategy:
@@ -130,119 +130,119 @@ jobs:
             dist/*.pkg.tar.zst
             dist/*.pkgver
 
-  # foreign arches run through qemu user emulation, only the packages that
-  # are confirmed to build are part of the matrix for now
-  build-emulated:
-    name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
-    if: ${{ github.event.inputs.SKIP_EMULATED != '1' && (github.event.inputs.ARCH == '' || (github.event.inputs.ARCH != 'x86_64' && github.event.inputs.ARCH != 'aarch64')) }}
-    permissions:
-      actions: read
-      security-events: write
-      contents: write
-      packages: read
-    # only the heavy emulated packages stay on blacksmith to avoid qemu
-    # timeouts/OOM on the free GitHub runner; the blacksmith SKU can be
-    # overridden with the EMULATED_RUNNER input
-    runs-on: >-
-      ${{ (contains(fromJSON('["mesa-mini","mesa-nano"]'), matrix.script)
-      && (github.event.inputs.EMULATED_RUNNER || 'blacksmith-32vcpu-ubuntu-2404'))
-      || 'ubuntu-24.04' }}
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-      matrix:
-        script:
-          - icu-mini
-          - libxml2-mini
-          - opus-mini
-          - mesa-mini
-          - mesa-nano
-          - glycin-mini
-          - libdecor-mini
-        arch: [riscv64, loongarch64, ppc64le, ppc64]
-        include:
-          - { arch: riscv64, platform: linux/riscv64 }
-          - { arch: loongarch64, platform: linux/loong64 }
-          - { arch: ppc64le, platform: linux/ppc64le }
-          - { arch: ppc64, platform: linux/ppc64 }
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: set up qemu
-        if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
-        run: |
-          # cold blacksmith VMs don't have binfmt_misc mounted on the host, so
-          # qemu registration would otherwise land in a throwaway mount
-          # namespace and foreign containers fail with "exec format error"
-          if ! mountpoint -q /proc/sys/fs/binfmt_misc; then
-            sudo modprobe binfmt_misc || true
-            sudo mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
-          fi
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends qemu-user-static
-          # make sure the handlers actually landed in the host kernel
-          sudo systemctl restart systemd-binfmt 2>/dev/null || sudo /usr/lib/systemd/systemd-binfmt 2>/dev/null || true
-          for emu in riscv64 loongarch64 ppc64 ppc64le; do
-            grep -q enabled "/proc/sys/fs/binfmt_misc/qemu-$emu"
-          done
-
-      - name: set up ccache
-        if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ${{ github.workspace }}/.ccache
-          key: ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-
-
-      # a package first pushed by GITHUB_TOKEN is private, so authenticate the
-      # raw `docker run` pull below (the native job pulls via its container: config)
-      - name: login to ghcr
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: build package
-        if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
-        env:
-          FORCE_BUILD: ${{ github.event.inputs.FORCE_BUILD }}
-          ONE_PACKAGE: ${{ github.event.inputs.ONE_PACKAGE }}
-          CCACHE_DIR: ${{ github.workspace }}/.ccache
-          CCACHE_COMPILERCHECK: content
-          CCACHE_SLOPPINESS: time_macros,file_macro,include_file_mtime,include_file_ctime
-        run: |
-          docker run --rm --platform ${{ matrix.platform }} \
-            --cap-add=SYS_ADMIN --security-opt seccomp=unconfined \
-            -e CCACHE_DIR=/repo/.ccache -e CCACHE_COMPILERCHECK=content \
-            -e CCACHE_SLOPPINESS='time_macros,file_macro,include_file_mtime,include_file_ctime' \
-            -e FORCE_BUILD="$FORCE_BUILD" -e ONE_PACKAGE="$ONE_PACKAGE" \
-            -e GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
-            -v "$PWD":/repo -w /repo \
-            ghcr.io/pkgforge-dev/archlinux-builder:${{ matrix.arch }} \
-            /bin/sh -euc '/bin/sh ./bin/prepare-build && /bin/sh ./bin/build-package ${{ matrix.script }}.sh'
-
-      - name: Upload artifact
-        if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: ${{ format('{0}-{1}', matrix.script, matrix.arch) }}
-          path: "dist"
-
-      # release as soon as this package finishes instead of waiting for the
-      # whole matrix to complete
-      - name: release
-        if: ${{ github.ref_name == 'main' && (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
-        uses: softprops/action-gh-release@e598afbe1493e6b1bafb1f389cabb956eab91231 # v3.0.3
-        with:
-          name: "Continuous build"
-          tag_name: continuous
-          prerelease: false
-          make_latest: true
-          target_commitish: ${{ github.sha }}
-          files: |
-            dist/*.pkg.tar.zst
-            dist/*.pkgver
+#  # foreign arches run through qemu user emulation, only the packages that
+#  # are confirmed to build are part of the matrix for now
+#  build-emulated:
+#    name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
+#    if: ${{ github.event.inputs.SKIP_EMULATED != '1' && (github.event.inputs.ARCH == '' || (github.event.inputs.ARCH != 'x86_64' && github.event.inputs.ARCH != 'aarch64')) }}
+#    permissions:
+#      actions: read
+#      security-events: write
+#      contents: write
+#      packages: read
+#    # only the heavy emulated packages stay on blacksmith to avoid qemu
+#    # timeouts/OOM on the free GitHub runner; the blacksmith SKU can be
+#    # overridden with the EMULATED_RUNNER input
+#    runs-on: >-
+#      ${{ (contains(fromJSON('["mesa-mini","mesa-nano"]'), matrix.script)
+#      && (github.event.inputs.EMULATED_RUNNER || 'blacksmith-32vcpu-ubuntu-2404'))
+#      || 'ubuntu-24.04' }}
+#    continue-on-error: true
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        script:
+#          - icu-mini
+#          - libxml2-mini
+#          - opus-mini
+#          - mesa-mini
+#          - mesa-nano
+#          - glycin-mini
+#          - libdecor-mini
+#        arch: [riscv64, loongarch64, ppc64le, ppc64]
+#        include:
+#          - { arch: riscv64, platform: linux/riscv64 }
+#          - { arch: loongarch64, platform: linux/loong64 }
+#          - { arch: ppc64le, platform: linux/ppc64le }
+#          - { arch: ppc64, platform: linux/ppc64 }
+#    steps:
+#      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+#        with:
+#          persist-credentials: false
+#
+#      - name: set up qemu
+#        if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
+#        run: |
+#          # cold blacksmith VMs don't have binfmt_misc mounted on the host, so
+#          # qemu registration would otherwise land in a throwaway mount
+#          # namespace and foreign containers fail with "exec format error"
+#          if ! mountpoint -q /proc/sys/fs/binfmt_misc; then
+#            sudo modprobe binfmt_misc || true
+#            sudo mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
+#          fi
+#          sudo apt-get update
+#          sudo apt-get install -y --no-install-recommends qemu-user-static
+#          # make sure the handlers actually landed in the host kernel
+#          sudo systemctl restart systemd-binfmt 2>/dev/null || sudo /usr/lib/systemd/systemd-binfmt 2>/dev/null || true
+#          for emu in riscv64 loongarch64 ppc64 ppc64le; do
+#            grep -q enabled "/proc/sys/fs/binfmt_misc/qemu-$emu"
+#          done
+#
+#      - name: set up ccache
+#        if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
+#        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+#        with:
+#          path: ${{ github.workspace }}/.ccache
+#          key: ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-${{ github.sha }}
+#          restore-keys: |
+#            ${{ runner.os }}-ccache-${{ matrix.script }}-${{ matrix.arch }}-
+#
+#      # a package first pushed by GITHUB_TOKEN is private, so authenticate the
+#      # raw `docker run` pull below (the native job pulls via its container: config)
+#      - name: login to ghcr
+#        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+#        with:
+#          registry: ghcr.io
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: build package
+#        if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
+#        env:
+#          FORCE_BUILD: ${{ github.event.inputs.FORCE_BUILD }}
+#          ONE_PACKAGE: ${{ github.event.inputs.ONE_PACKAGE }}
+#          CCACHE_DIR: ${{ github.workspace }}/.ccache
+#          CCACHE_COMPILERCHECK: content
+#          CCACHE_SLOPPINESS: time_macros,file_macro,include_file_mtime,include_file_ctime
+#        run: |
+#          docker run --rm --platform ${{ matrix.platform }} \
+#            --cap-add=SYS_ADMIN --security-opt seccomp=unconfined \
+#            -e CCACHE_DIR=/repo/.ccache -e CCACHE_COMPILERCHECK=content \
+#            -e CCACHE_SLOPPINESS='time_macros,file_macro,include_file_mtime,include_file_ctime' \
+#            -e FORCE_BUILD="$FORCE_BUILD" -e ONE_PACKAGE="$ONE_PACKAGE" \
+#            -e GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+#            -v "$PWD":/repo -w /repo \
+#            ghcr.io/pkgforge-dev/archlinux-builder:${{ matrix.arch }} \
+#            /bin/sh -euc '/bin/sh ./bin/prepare-build && /bin/sh ./bin/build-package ${{ matrix.script }}.sh'
+#
+#      - name: Upload artifact
+#        if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
+#        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+#        with:
+#          name: ${{ format('{0}-{1}', matrix.script, matrix.arch) }}
+#          path: "dist"
+#
+#      # release as soon as this package finishes instead of waiting for the
+#      # whole matrix to complete
+#      - name: release
+#        if: ${{ github.ref_name == 'main' && (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
+#        uses: softprops/action-gh-release@e598afbe1493e6b1bafb1f389cabb956eab91231 # v3.0.3
+#        with:
+#          name: "Continuous build"
+#          tag_name: continuous
+#          prerelease: false
+#          make_latest: true
+#          target_commitish: ${{ github.sha }}
+#          files: |
+#            dist/*.pkg.tar.zst
+#            dist/*.pkgver
