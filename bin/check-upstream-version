@@ -36,20 +36,18 @@ else
 	echo "----------------------------------------------------------------"
 fi
 
-UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}')
-epoch=$(awk -F'=' '/^epoch=/{print $2; exit}' "$PKGBUILD")
-FULL_VERSION="${epoch:+$epoch:}$CURRENT_VERSION"
+UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 
 echo "UPSTREAM version: $UPSTREAM_VERSION"
 if [ "$FORCE_UPSTREAM" = 1 ]; then
 	echo "FORCE_BUILD=$FORCE_BUILD, ignoring the upstream version..."
 else
-	CMP=$(vercmp "$FULL_VERSION" "$UPSTREAM_VERSION")
+	CMP=$(vercmp "$CURRENT_VERSION" "$UPSTREAM_VERSION")
 	if [ "$CMP" != 0 ]; then
 		if [ "$CMP" -gt 0 ]; then
-			>&2 echo "PKGBUILD ($FULL_VERSION) is newer than upstream ($UPSTREAM_VERSION)"
+			>&2 echo "PKGBUILD ($CURRENT_VERSION) is newer than upstream ($UPSTREAM_VERSION)"
 		else
-			>&2 echo "PKGBUILD ($FULL_VERSION) is older than upstream ($UPSTREAM_VERSION)"
+			>&2 echo "PKGBUILD ($CURRENT_VERSION) is older than upstream ($UPSTREAM_VERSION)"
 		fi
 		>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
 		>&2 echo "----------------------------------------------------------------"
