@@ -15,11 +15,13 @@ sed -i \
 # skip tests since they take too long
 sed -i -e 's|meson test -C build|echo "skipped" #meson test -C build|' "$PKGBUILD"
 
-# the ported arches have no intrinsics or rtcd support in opus meson.build
+# the ported arches have no intrinsics or rtcd support in opus meson.build,
+# the port PKGBUILDs and patches already disable them
 case "$ARCH" in
 	'x86_64'|'aarch64') : ;;
 	*)
-		sed -i -e 's|arch-meson opus build|arch-meson opus build -D intrinsics=disabled -D rtcd=disabled|' "$PKGBUILD"
+		grep -q 'intrinsics=disabled' "$PKGBUILD" ||
+			sed -i -e 's|arch-meson opus build|arch-meson opus build -D intrinsics=disabled -D rtcd=disabled|' "$PKGBUILD"
 		;;
 esac
 

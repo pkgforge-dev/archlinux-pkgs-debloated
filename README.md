@@ -72,14 +72,25 @@ private; the build jobs have `packages: read` and `build-emulated` logs in to
 ghcr, so they can still pull it. Making the package public in its settings is
 optional but matches the other pkgforge images.
 
-## Version sync with the archlinux forks
+## PKGBUILDs and version sync with the archlinux forks
+
+The emulated arches build from the PKGBUILD of their own archlinux port
+(`bin/get-port-pkgbuild`):
+
+* `ppc64le`, `ppc64`: the complete PKGBUILD from [ArchPOWER](https://git.archlinuxpower.org/ArchPOWER/packages).
+* `riscv64`: the Archlinux PKGBUILD plus `riscv64.patch` (and the extra files next to it) from [archriscv-packages](https://github.com/felixonmars/archriscv-packages).
+* `loongarch64`: the same with `loong.patch` from [loongarch-packages](https://github.com/lcpu-club/loongarch-packages).
+
+The riscv64 and loongarch64 ports only patch the packages that need it. For the
+others the plain Archlinux PKGBUILD is used. It is the one tagged
+(`[epoch-]pkgver-pkgrel`) with the version the port repo carries, not the latest
+one. A patch that does not apply cleanly fails the build.
 
 A package is only built when its PKGBUILD version equals the version that the
 pacman repositories of the target architecture carry (`bin/check-upstream-version`,
 compared with `vercmp`, epoch included). This avoids partial updates. On the
-emulated arches (`riscv64`, `loongarch64`, `ppc64le`, `ppc64`) those repositories
-are the ones of the respective archlinux port, which usually lag behind
-Archlinux. For them `bin/get-pkgbuild` checks out the Archlinux PKGBUILD tag
-(`[epoch-]pkgver-pkgrel`) of the version the port carries. When the port has no
-such tag (it carries its own pkgrel) or does not carry the package at all, the
-build is skipped. `FORCE_BUILD=2` builds the latest PKGBUILD anyway.
+emulated arches those repositories are the ones of the respective port, which
+can lag behind Archlinux. The build is skipped when the versions differ, when
+there is no Archlinux tag for the version the port carries (the port uses its own
+pkgrel), or when the port does not carry the package. `FORCE_BUILD=2` builds
+anyway.

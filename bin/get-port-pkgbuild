@@ -1,0 +1,92 @@
+#!/bin/sh
+
+# Puts the PKGBUILD that the archlinux port of $ARCH builds from into
+# $BUILD_DIR. Used for riscv64, loongarch64, ppc64le and ppc64.
+#
+#  * ppc64le, ppc64: ArchPOWER keeps complete PKGBUILDs, use them as they are.
+#  * riscv64, loongarch64: the ports only keep a patch (plus extra source files)
+#    for the Archlinux PKGBUILD. Check out the Archlinux PKGBUILD of the version
+#    the port repo carries and apply the patch, like the ports do themselves.
+#
+# When the port does not touch a package at all (nothing in its repo), the
+# plain Archlinux PKGBUILD of that version is used.
+
+set -eu
+
+ARCH_REPO=https://gitlab.archlinux.org/archlinux/packaging/packages
+RISCV_REPO=https://github.com/felixonmars/archriscv-packages
+LOONG_REPO=https://github.com/lcpu-club/loongarch-packages
+POWER_REPO=https://git.archlinuxpower.org/ArchPOWER/packages
+
+FORK_DIR="${TMPDIR:-/tmp}"/port-pkgbuilds
+rm -rf "$FORK_DIR"
+trap 'rm -rf "$FORK_DIR"' EXIT INT TERM
+
+# Check out only the directory of this package from a port monorepo. A failing
+# clone is an error, a package that is not in the repo is not.
+fetch_fork_dir() {
+	git clone -q --depth 1 --filter=blob:none --sparse "$1" "$FORK_DIR"
+	git -C "$FORK_DIR" sparse-checkout set "$PACKAGE"
+	[ -d "$FORK_DIR/$PACKAGE" ]
+}
+
+# Archlinux PKGBUILD of the version that the repos of this port carry. The
+# archlinux repos tag every release as [epoch-]pkgver-pkgrel. Without such a
+# tag (the port carries its own pkgrel, or does not have the package) the head
+# is kept and check-upstream-version rejects the mismatch.
+get_arch_pkgbuild() {
+	git clone --depth 1 "$ARCH_REPO"/"$PACKAGE" "$BUILD_DIR"
+	PORT_VERSION=$(repo-version)
+	if [ -z "$PORT_VERSION" ]; then
+		>&2 echo "No repository for $ARCH carries '$PACKAGE', keeping the latest PKGBUILD"
+		return 0
+	fi
+	PORT_TAG=$(echo "$PORT_VERSION" | tr ':' '-')
+	if git -C "$BUILD_DIR" fetch --depth 1 origin "refs/tags/$PORT_TAG:refs/tags/$PORT_TAG" &&
+		git -C "$BUILD_DIR" checkout -q "$PORT_TAG"; then
+		echo "Using the Archlinux PKGBUILD of $PACKAGE $PORT_VERSION, the version $ARCH carries"
+	else
+		>&2 echo "No archlinux tag '$PORT_TAG' for $PACKAGE, keeping the latest PKGBUILD"
+	fi
+}
+
+# riscv64 and loongarch64 only differ in where the patch lives and in how
+# its paths are written (the ports' own scripts apply them with these -p)
+apply_port_patch() {
+	REPO=$1 PATCH=$2 STRIP=$3
+	get_arch_pkgbuild
+	if fetch_fork_dir "$REPO" && [ -f "$FORK_DIR/$PACKAGE/$PATCH" ]; then
+		echo "Applying $PATCH from $REPO"
+		# extra source files the patch refers to live next to it
+		for f in "$FORK_DIR/$PACKAGE"/*; do
+			[ "${f##*/}" = "$PATCH" ] || cp -v "$f" "$BUILD_DIR"/
+		done
+		# --fuzz=0: a patch that only applies loosely belongs to another version
+		patch -d "$BUILD_DIR" -p"$STRIP" --fuzz=0 -i "$FORK_DIR/$PACKAGE/$PATCH"
+	else
+		echo "$REPO has no patch for '$PACKAGE', using the Archlinux PKGBUILD as it is"
+	fi
+}
+
+case "$ARCH" in
+	riscv64)
+		apply_port_patch "$RISCV_REPO" riscv64.patch 0
+		;;
+	loongarch64)
+		apply_port_patch "$LOONG_REPO" loong.patch 1
+		;;
+	ppc64le | ppc64)
+		if fetch_fork_dir "$POWER_REPO" && [ -f "$FORK_DIR/$PACKAGE/PKGBUILD" ]; then
+			echo "Using the ArchPOWER PKGBUILD of '$PACKAGE'"
+			mkdir -p "$BUILD_DIR"
+			cp -a "$FORK_DIR/$PACKAGE"/. "$BUILD_DIR"/
+		else
+			>&2 echo "ArchPOWER does not have '$PACKAGE', using the Archlinux PKGBUILD instead"
+			get_arch_pkgbuild
+		fi
+		;;
+	*)
+		>&2 echo "No port PKGBUILD source for '$ARCH'"
+		exit 1
+		;;
+esac

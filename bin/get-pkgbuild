@@ -29,29 +29,8 @@ elif [ "$ARCH" = 'aarch64' ]; then
 	fi
 	rm -rf "$ALARM_DIR"
 else
-	# the port monorepos do not carry every package, the archlinux PKGBUILD
-	# works for x86_64 and most ported arches after the arch sed below
-	git clone --depth 1 "$ARCH_REPO"/"$PACKAGE" "$BUILD_DIR"
-
-	# The ports lag behind Archlinux, so the PKGBUILD at the head of the
-	# archlinux repo is usually newer than what the port repo ships. Check
-	# out the PKGBUILD of the version the port repo carries instead, so
-	# the package stays in sync with its port. The archlinux repos tag every
-	# release as [epoch-]pkgver-pkgrel. If there is no such tag (the port
-	# carries its own pkgrel, or does not have the package) the head is
-	# kept and check-upstream-version rejects the mismatch.
-	PORT_VERSION=$(repo-version)
-	if [ -n "$PORT_VERSION" ]; then
-		PORT_TAG=$(echo "$PORT_VERSION" | tr ':' '-')
-		if git -C "$BUILD_DIR" fetch --depth 1 origin "refs/tags/$PORT_TAG:refs/tags/$PORT_TAG" &&
-			git -C "$BUILD_DIR" checkout -q "$PORT_TAG"; then
-			echo "Using the PKGBUILD of $PACKAGE $PORT_VERSION, the version $ARCH carries"
-		else
-			>&2 echo "No archlinux tag '$PORT_TAG' for $PACKAGE, keeping the latest PKGBUILD"
-		fi
-	else
-		>&2 echo "No repository for $ARCH carries '$PACKAGE', keeping the latest PKGBUILD"
-	fi
+	# riscv64, loongarch64, ppc64le, ppc64: the PKGBUILD of the port itself
+	get-port-pkgbuild
 fi
 
 echo "----------------------------------------"
