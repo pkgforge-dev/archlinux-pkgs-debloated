@@ -18,13 +18,6 @@ PORT_DIR="${TMPDIR:-/tmp}"/port-pkgbuilds
 rm -rf "$PORT_DIR"
 trap 'rm -rf "$PORT_DIR"' EXIT INT TERM
 
-# Clone a port repo. Fails if the clone fails, returns 1 if the port has no
-# directory for $PACKAGE.
-clone_port_dir() {
-	git clone -q --depth 1 "$1" "$PORT_DIR"
-	[ -d "$PORT_DIR/$PACKAGE" ]
-}
-
 # Archlinux PKGBUILD of the version that the port's pacman repo has.
 # Archlinux tags releases as [epoch-]pkgver-pkgrel. If there is no tag the
 # latest PKGBUILD stays and check-upstream-version rejects the mismatch.
@@ -48,7 +41,8 @@ get_arch_pkgbuild() {
 
 # ppc64le, ppc64
 get_archpower_pkgbuild() {
-	if clone_port_dir "$POWER_REPO" && [ -f "$PORT_DIR/$PACKAGE/PKGBUILD" ]; then
+	git clone -q --depth 1 "$POWER_REPO" "$PORT_DIR"
+	if [ -f "$PORT_DIR/$PACKAGE/PKGBUILD" ]; then
 		echo "Using the ArchPOWER PKGBUILD of '$PACKAGE'"
 		mkdir -p "$BUILD_DIR"
 		cp -a "$PORT_DIR/$PACKAGE"/. "$BUILD_DIR"/
@@ -63,7 +57,8 @@ get_archpower_pkgbuild() {
 get_patched_pkgbuild() {
 	get_arch_pkgbuild
 
-	if ! clone_port_dir "$1" || [ ! -f "$PORT_DIR/$PACKAGE/$2" ]; then
+	git clone -q --depth 1 "$1" "$PORT_DIR"
+	if [ ! -f "$PORT_DIR/$PACKAGE/$2" ]; then
 		echo "$1 does not patch '$PACKAGE', using the Archlinux PKGBUILD as it is"
 		return
 	fi
