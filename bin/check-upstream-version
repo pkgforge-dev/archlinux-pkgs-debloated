@@ -40,14 +40,9 @@ UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}')
 epoch=$(awk -F'=' '/^epoch=/{print $2; exit}' "$PKGBUILD")
 FULL_VERSION="${epoch:+$epoch:}$CURRENT_VERSION"
 
-echo "UPSTREAM version: ${UPSTREAM_VERSION:-none}"
+echo "UPSTREAM version: $UPSTREAM_VERSION"
 if [ "$FORCE_UPSTREAM" = 1 ]; then
 	echo "FORCE_BUILD=$FORCE_BUILD, ignoring the upstream version..."
-elif [ -z "$UPSTREAM_VERSION" ]; then
-	>&2 echo "ABORTING BUILD BECAUSE NO REPOSITORY FOR $ARCH CARRIES '$PACKAGE'!"
-	>&2 echo "----------------------------------------------------------------"
-	:> ~/OPERATION_ABORTED
-	exit 1
 else
 	CMP=$(vercmp "$FULL_VERSION" "$UPSTREAM_VERSION")
 	if [ "$CMP" != 0 ]; then

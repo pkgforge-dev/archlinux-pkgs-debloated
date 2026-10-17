@@ -19,8 +19,9 @@ sed -i -e 's|meson test -C build|echo "skipped" #meson test -C build|' "$PKGBUIL
 case "$ARCH" in
 	'x86_64'|'aarch64') : ;;
 	*)
-		grep -q 'intrinsics=disabled' "$PKGBUILD" ||
+		if ! grep -q 'intrinsics=disabled' "$PKGBUILD"; then
 			sed -i -e 's|arch-meson opus build|arch-meson opus build -D intrinsics=disabled -D rtcd=disabled|' "$PKGBUILD"
+		fi
 		;;
 esac
 
