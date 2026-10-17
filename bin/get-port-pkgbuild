@@ -13,16 +13,15 @@ POWER_REPO=https://git.archlinuxpower.org/ArchPOWER/packages
 RISCV_REPO=https://github.com/felixonmars/archriscv-packages
 LOONG_REPO=https://github.com/lcpu-club/loongarch-packages
 
-# the port repos hold one directory per package, it is cloned in here
+# the port repos hold one directory per package
 PORT_DIR="${TMPDIR:-/tmp}"/port-pkgbuilds
 rm -rf "$PORT_DIR"
 trap 'rm -rf "$PORT_DIR"' EXIT INT TERM
 
-# Clone only the directory of $PACKAGE from a port repo.
-# Fails if the clone fails, returns 1 if the port has no such directory.
+# Clone a port repo. Fails if the clone fails, returns 1 if the port has no
+# directory for $PACKAGE.
 clone_port_dir() {
-	git clone -q --depth 1 --filter=blob:none --sparse "$1" "$PORT_DIR"
-	git -C "$PORT_DIR" sparse-checkout set "$PACKAGE"
+	git clone -q --depth 1 "$1" "$PORT_DIR"
 	[ -d "$PORT_DIR/$PACKAGE" ]
 }
 
