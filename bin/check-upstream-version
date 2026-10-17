@@ -3,7 +3,8 @@
 # This script compares the version of the PKGBUILD with the version that was
 # already released, and with the upstream version. This is to avoid rebuilding a
 # package that is already released and to avoid pushing packages that are too
-# new causing partial updates as result
+# new causing partial updates as result. A package that no repository of the
+# target architecture has is only compared with the released version.
 
 set -e
 
@@ -38,8 +39,10 @@ fi
 
 UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 
-echo "UPSTREAM version: $UPSTREAM_VERSION"
-if [ "$FORCE_UPSTREAM" = 1 ]; then
+echo "UPSTREAM version: ${UPSTREAM_VERSION:-none}"
+if [ -z "$UPSTREAM_VERSION" ]; then
+	echo "No $ARCH repo has '$PACKAGE', only the released version is checked..."
+elif [ "$FORCE_UPSTREAM" = 1 ]; then
 	echo "FORCE_BUILD=$FORCE_BUILD, ignoring the upstream version..."
 elif [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
 	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
