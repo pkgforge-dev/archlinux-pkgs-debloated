@@ -3,8 +3,9 @@
 # This script compares the version of the PKGBUILD with the version that was
 # already released, and with the upstream version. This is to avoid rebuilding a
 # package that is already released and to avoid pushing packages that are too
-# new causing partial updates as result. A package that no repository of the
-# target architecture has is only compared with the released version.
+# new causing partial updates as result. A build script for a package that is
+# not in the Archlinux repositories sets SKIP_UPSTREAM_CHECK=1 to only be
+# compared with the released version.
 
 set -e
 
@@ -37,18 +38,20 @@ else
 	echo "----------------------------------------------------------------"
 fi
 
-UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
+if [ "$SKIP_UPSTREAM_CHECK" = 1 ]; then
+	echo "SKIP_UPSTREAM_CHECK=1, not comparing with the upstream version..."
+else
+	UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 
-echo "UPSTREAM version: ${UPSTREAM_VERSION:-none}"
-if [ -z "$UPSTREAM_VERSION" ]; then
-	echo "No $ARCH repo has '$PACKAGE', only the released version is checked..."
-elif [ "$FORCE_UPSTREAM" = 1 ]; then
-	echo "FORCE_BUILD=$FORCE_BUILD, ignoring the upstream version..."
-elif [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
-	>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
-	>&2 echo "----------------------------------------------------------------"
-	:> ~/OPERATION_ABORTED
-	exit 1
+	echo "UPSTREAM version: $UPSTREAM_VERSION"
+	if [ "$FORCE_UPSTREAM" = 1 ]; then
+		echo "FORCE_BUILD=$FORCE_BUILD, ignoring the upstream version..."
+	elif [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
+		>&2 echo "ABORTING BUILD BECAUSE OF VERSION MISMATCH WITH UPSTREAM!"
+		>&2 echo "----------------------------------------------------------------"
+		:> ~/OPERATION_ABORTED
+		exit 1
+	fi
 fi
 echo "Building package..."
 echo "----------------------------------------------------------------"

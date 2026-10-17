@@ -92,6 +92,7 @@ compared as strings). This avoids partial updates. On the
 emulated arches those repositories are the ones of the respective port, which
 can lag behind Archlinux. The build is skipped when the versions differ, or when
 there is no Archlinux tag for the version the port carries (the port uses its own
-pkgrel). A package that no repository of the architecture has is not compared with
-anything, it is only skipped when its version is already released.
-`FORCE_BUILD=2` builds anyway.
+pkgrel), or when the port does not carry the package. A build script for a package
+that is not in the Archlinux repositories (`PKGBUILD_REPO` or `AUR_PACKAGE`) sets
+`SKIP_UPSTREAM_CHECK=1`, it is then only skipped when its version is already
+released. `FORCE_BUILD=2` builds anyway.
