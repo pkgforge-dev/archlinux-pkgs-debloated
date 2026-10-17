@@ -29,9 +29,7 @@ elif [ "$ARCH" = 'aarch64' ]; then
 	fi
 	rm -rf "$ALARM_DIR"
 else
-	# the port monorepos do not carry every package, the archlinux PKGBUILD
-	# works for x86_64 and most ported arches after the arch sed below
-	git clone --depth 1 "$ARCH_REPO"/"$PACKAGE" "$BUILD_DIR"
+	get-port-pkgbuild
 fi
 
 echo "----------------------------------------"

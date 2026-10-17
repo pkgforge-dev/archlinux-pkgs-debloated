@@ -1,0 +1,93 @@
+#!/bin/sh
+
+# Puts the PKGBUILD of the archlinux port of $ARCH into $BUILD_DIR.
+#
+#   ppc64le, ppc64:       ArchPOWER keeps complete PKGBUILDs, copy it.
+#   riscv64, loongarch64: the ports only keep a patch, apply it to the
+#                         Archlinux PKGBUILD.
+
+set -eu
+
+ARCH_REPO=https://gitlab.archlinux.org/archlinux/packaging/packages
+POWER_REPO=https://git.archlinuxpower.org/ArchPOWER/packages
+RISCV_REPO=https://github.com/felixonmars/archriscv-packages
+LOONG_REPO=https://github.com/lcpu-club/loongarch-packages
+
+# the port repos hold one directory per package
+PORT_DIR="${TMPDIR:-/tmp}"/port-pkgbuilds
+rm -rf "$PORT_DIR"
+trap 'rm -rf "$PORT_DIR"' EXIT
+trap 'exit 1' INT TERM
+
+# Archlinux PKGBUILD of the version that the port's pacman repo has.
+# Archlinux tags releases as [epoch-]pkgver-pkgrel. If there is no tag the
+# latest PKGBUILD stays and check-upstream-version rejects the mismatch.
+get_arch_pkgbuild() {
+	git clone --depth 1 "$ARCH_REPO/$PACKAGE" "$BUILD_DIR"
+
+	version=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}')
+	if [ -z "$version" ]; then
+		>&2 echo "No $ARCH repo has '$PACKAGE', keeping the latest PKGBUILD"
+		return
+	fi
+
+	tag=$(echo "$version" | tr ':' '-')
+	if git -C "$BUILD_DIR" fetch --depth 1 origin "refs/tags/$tag:refs/tags/$tag" &&
+		git -C "$BUILD_DIR" checkout -q "$tag"; then
+		echo "Using the Archlinux PKGBUILD of $PACKAGE $version"
+	else
+		>&2 echo "No archlinux tag '$tag' for '$PACKAGE', keeping the latest PKGBUILD"
+	fi
+}
+
+# ppc64le, ppc64
+get_archpower_pkgbuild() {
+	git clone -q --depth 1 "$POWER_REPO" "$PORT_DIR"
+
+	# some packages are in a group directory (qt6/qt6-base)
+	dir=
+	for d in "$PORT_DIR/$PACKAGE" "$PORT_DIR"/*/"$PACKAGE"; do
+		if [ -f "$d/PKGBUILD" ]; then
+			dir=$d
+			break
+		fi
+	done
+
+	if [ -n "$dir" ]; then
+		echo "Using the ArchPOWER PKGBUILD of '$PACKAGE'"
+		mkdir -p "$BUILD_DIR"
+		cp -a "$dir"/. "$BUILD_DIR"/
+	else
+		>&2 echo "ArchPOWER does not have '$PACKAGE', using the Archlinux PKGBUILD"
+		get_arch_pkgbuild
+	fi
+}
+
+# riscv64, loongarch64
+# $1 = port repo, $2 = name of the patch file, $3 = patch -p level
+get_patched_pkgbuild() {
+	get_arch_pkgbuild
+
+	git clone -q --depth 1 "$1" "$PORT_DIR"
+	if [ ! -f "$PORT_DIR/$PACKAGE/$2" ]; then
+		echo "$1 does not patch '$PACKAGE', using the Archlinux PKGBUILD as it is"
+		return
+	fi
+
+	echo "Applying $2 from $1"
+	# the other files in the directory are sources the patch adds to the PKGBUILD
+	for file in "$PORT_DIR/$PACKAGE"/*; do
+		[ "${file##*/}" = "$2" ] || cp -rv "$file" "$BUILD_DIR"/
+	done
+	patch -d "$BUILD_DIR" -p"$3" --fuzz=0 -i "$PORT_DIR/$PACKAGE/$2"
+}
+
+case "$ARCH" in
+	ppc64le | ppc64) get_archpower_pkgbuild ;;
+	riscv64)         get_patched_pkgbuild "$RISCV_REPO" riscv64.patch 0 ;;
+	loongarch64)     get_patched_pkgbuild "$LOONG_REPO" loong.patch 1 ;;
+	*)
+		>&2 echo "No port PKGBUILD source for '$ARCH'"
+		exit 1
+		;;
+esac

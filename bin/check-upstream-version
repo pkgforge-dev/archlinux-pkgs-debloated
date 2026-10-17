@@ -36,16 +36,6 @@ else
 	echo "----------------------------------------------------------------"
 fi
 
-# Comparing versions on the ported arches is unreliable (their repos lag
-# behind or don't carry the package), so always build them
-case "$ARCH" in
-	riscv64|loongarch64|ppc64*)
-		>&2 echo "Building regardless of version mismatch for $ARCH"
-		>&2 echo "----------------------------------------------------------------"
-		exit 0
-		;;
-esac
-
 UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 
 echo "UPSTREAM version: $UPSTREAM_VERSION"

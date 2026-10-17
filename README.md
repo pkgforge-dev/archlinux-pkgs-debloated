@@ -59,8 +59,7 @@ that bakes in `base-devel`, `ccache`, `clang`, `cmake`, `curl`, `git`, `mold`,
 `ninja` and `wget` plus the initialized pacman keyring. The main win is keeping
 the toolchain in one place instead of installing it per job. On the
 GitHub-hosted native legs the ~2 GB image is pulled fresh on every job, so wall
-time there is roughly a wash versus installing the toolchain. The emulated
-foreign-arch (qemu) legs are currently disabled.
+time there is roughly a wash versus installing the toolchain.
 
 The image is built per arch by the `build builder image` workflow and refreshed
 weekly, so its package database can be up to a week old; `prepare-build` falls
@@ -69,6 +68,29 @@ keeps the workflow usable with a plain `ghcr.io/pkgforge-dev/archlinux` base.
 
 Run `build builder image` manually once before the first build after merging
 (and whenever the `Dockerfile` changes). That first run pushes the package as
-private; the build jobs have `packages: read`, so they can still pull it.
-Making the package public in its settings is
+private; the build jobs have `packages: read` and `build-emulated` logs in to
+ghcr, so they can still pull it. Making the package public in its settings is
 optional but matches the other pkgforge images.
+
+## PKGBUILDs and version sync with the archlinux forks
+
+The emulated arches build from the PKGBUILD of their own archlinux port
+(`bin/get-port-pkgbuild`):
+
+* `ppc64le`, `ppc64`: the complete PKGBUILD from [ArchPOWER](https://git.archlinuxpower.org/ArchPOWER/packages).
+* `riscv64`: the Archlinux PKGBUILD plus `riscv64.patch` (and the extra files next to it) from [archriscv-packages](https://github.com/felixonmars/archriscv-packages).
+* `loongarch64`: the same with `loong.patch` from [loongarch-packages](https://github.com/lcpu-club/loongarch-packages).
+
+The riscv64 and loongarch64 ports only patch the packages that need it. For the
+others the plain Archlinux PKGBUILD is used. It is the one tagged
+(`[epoch-]pkgver-pkgrel`) with the version the port repo carries, not the latest
+one. A patch that does not apply cleanly fails the build.
+
+A package is only built when its PKGBUILD version equals the version that the
+pacman repositories of the target architecture carry (`bin/check-upstream-version`,
+compared as strings). This avoids partial updates. On the
+emulated arches those repositories are the ones of the respective port, which
+can lag behind Archlinux. The build is skipped when the versions differ, when
+there is no Archlinux tag for the version the port carries (the port uses its own
+pkgrel), or when the port does not carry the package. `FORCE_BUILD=2` builds
+anyway.
