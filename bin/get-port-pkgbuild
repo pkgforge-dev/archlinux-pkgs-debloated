@@ -16,7 +16,8 @@ LOONG_REPO=https://github.com/lcpu-club/loongarch-packages
 # the port repos hold one directory per package
 PORT_DIR="${TMPDIR:-/tmp}"/port-pkgbuilds
 rm -rf "$PORT_DIR"
-trap 'rm -rf "$PORT_DIR"' EXIT INT TERM
+trap 'rm -rf "$PORT_DIR"' EXIT
+trap 'exit 1' INT TERM
 
 # Archlinux PKGBUILD of the version that the port's pacman repo has.
 # Archlinux tags releases as [epoch-]pkgver-pkgrel. If there is no tag the
@@ -42,10 +43,20 @@ get_arch_pkgbuild() {
 # ppc64le, ppc64
 get_archpower_pkgbuild() {
 	git clone -q --depth 1 "$POWER_REPO" "$PORT_DIR"
-	if [ -f "$PORT_DIR/$PACKAGE/PKGBUILD" ]; then
+
+	# some packages are in a group directory (qt6/qt6-base)
+	dir=
+	for d in "$PORT_DIR/$PACKAGE" "$PORT_DIR"/*/"$PACKAGE"; do
+		if [ -f "$d/PKGBUILD" ]; then
+			dir=$d
+			break
+		fi
+	done
+
+	if [ -n "$dir" ]; then
 		echo "Using the ArchPOWER PKGBUILD of '$PACKAGE'"
 		mkdir -p "$BUILD_DIR"
-		cp -a "$PORT_DIR/$PACKAGE"/. "$BUILD_DIR"/
+		cp -a "$dir"/. "$BUILD_DIR"/
 	else
 		>&2 echo "ArchPOWER does not have '$PACKAGE', using the Archlinux PKGBUILD"
 		get_arch_pkgbuild
@@ -66,7 +77,7 @@ get_patched_pkgbuild() {
 	echo "Applying $2 from $1"
 	# the other files in the directory are sources the patch adds to the PKGBUILD
 	for file in "$PORT_DIR/$PACKAGE"/*; do
-		[ "${file##*/}" = "$2" ] || cp -v "$file" "$BUILD_DIR"/
+		[ "${file##*/}" = "$2" ] || cp -rv "$file" "$BUILD_DIR"/
 	done
 	patch -d "$BUILD_DIR" -p"$3" --fuzz=0 -i "$PORT_DIR/$PACKAGE/$2"
 }

@@ -88,7 +88,7 @@ one. A patch that does not apply cleanly fails the build.
 
 A package is only built when its PKGBUILD version equals the version that the
 pacman repositories of the target architecture carry (`bin/check-upstream-version`,
-compared with `vercmp`). This avoids partial updates. On the
+compared as strings). This avoids partial updates. On the
 emulated arches those repositories are the ones of the respective port, which
 can lag behind Archlinux. The build is skipped when the versions differ, when
 there is no Archlinux tag for the version the port carries (the port uses its own

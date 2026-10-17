@@ -162,9 +162,9 @@ jobs:
       - name: set up qemu
         if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
         run: |
-          # runners without binfmt_misc mounted on the host would register qemu in a throwaway mount namespace, so
-          # qemu registration would otherwise land in a throwaway mount
-          # namespace and foreign containers fail with "exec format error"
+          # if binfmt_misc is not mounted on the host, qemu registers in a
+          # throwaway mount namespace and foreign containers fail with
+          # "exec format error"
           if ! mountpoint -q /proc/sys/fs/binfmt_misc; then
             sudo modprobe binfmt_misc || true
             sudo mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
