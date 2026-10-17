@@ -56,9 +56,8 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 Build jobs run inside `ghcr.io/pkgforge-dev/archlinux-builder:<arch>`, an image
 that bakes in `base-devel`, `ccache`, `clang`, `cmake`, `curl`, `git`, `mold`,
-`ninja` and `wget` plus the initialized pacman keyring. The real wins are the
-foreign-arch (qemu) legs on blacksmith, which cache images by digest, and
-keeping the toolchain in one place instead of installing it per job. On the
+`ninja` and `wget` plus the initialized pacman keyring. The main win is keeping
+the toolchain in one place instead of installing it per job. On the
 GitHub-hosted native legs the ~2 GB image is pulled fresh on every job, so wall
 time there is roughly a wash versus installing the toolchain.
 
