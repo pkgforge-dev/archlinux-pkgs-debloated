@@ -36,10 +36,7 @@ else
 	echo "----------------------------------------------------------------"
 fi
 
-# The version the repositories of this architecture carry. On the ported
-# arches that is the version of the archlinux fork (riscv64, loongarch64,
-# ppc64le, ppc64), which can differ from Archlinux itself
-UPSTREAM_VERSION=$(repo-version)
+UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}')
 epoch=$(awk -F'=' '/^epoch=/{print $2; exit}' "$PKGBUILD")
 FULL_VERSION="${epoch:+$epoch:}$CURRENT_VERSION"
 
@@ -52,8 +49,6 @@ elif [ -z "$UPSTREAM_VERSION" ]; then
 	:> ~/OPERATION_ABORTED
 	exit 1
 else
-	# vercmp is the comparison pacman itself uses, so epochs and
-	# alphanumeric versions order the same way they do for pacman
 	CMP=$(vercmp "$FULL_VERSION" "$UPSTREAM_VERSION")
 	if [ "$CMP" != 0 ]; then
 		if [ "$CMP" -gt 0 ]; then

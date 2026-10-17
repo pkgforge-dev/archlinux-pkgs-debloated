@@ -29,7 +29,6 @@ elif [ "$ARCH" = 'aarch64' ]; then
 	fi
 	rm -rf "$ALARM_DIR"
 else
-	# riscv64, loongarch64, ppc64le, ppc64: the PKGBUILD of the port itself
 	get-port-pkgbuild
 fi
 
