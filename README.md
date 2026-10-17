@@ -72,3 +72,15 @@ Run `build builder image` manually once before the first build after merging
 private; the build jobs have `packages: read` and `build-emulated` logs in to
 ghcr, so they can still pull it. Making the package public in its settings is
 optional but matches the other pkgforge images.
+
+## Version sync with the archlinux forks
+
+A package is only built when its PKGBUILD version equals the version that the
+pacman repositories of the target architecture carry (`bin/check-upstream-version`,
+compared with `vercmp`, epoch included). This avoids partial updates. On the
+emulated arches (`riscv64`, `loongarch64`, `ppc64le`, `ppc64`) those repositories
+are the ones of the respective archlinux port, which usually lag behind
+Archlinux. For them `bin/get-pkgbuild` checks out the Archlinux PKGBUILD tag
+(`[epoch-]pkgver-pkgrel`) of the version the port carries. When the port has no
+such tag (it carries its own pkgrel) or does not carry the package at all, the
+build is skipped. `FORCE_BUILD=2` builds the latest PKGBUILD anyway.
