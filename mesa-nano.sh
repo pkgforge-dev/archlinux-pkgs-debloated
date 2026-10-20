@@ -64,7 +64,7 @@ case "$ARCH" in
 			vulkan-panfrost vulkan-powervr vulkan-radeon vulkan-swrast \
 			vulkan-virtio vulkan-mesa-implicit-layers vulkan-mesa-layers
 		sed -i \
-			-e '/_pick vk/d'     \
+			-e '/_pick vk\(asahi\|brcom\|d3d12\|fdreno\|gfxstr\|intel\|nvidia\|pfrost\|powrvr\|radeon\|swrast\|virtio\)/d' \
 			-e '/_pick opencl/d' \
 			-e "s|gallium-drivers=.*|gallium-drivers=$gallium_drivers|" \
 			-e "s|vulkan-drivers=.*|vulkan-drivers=$vulkan_drivers|" \
