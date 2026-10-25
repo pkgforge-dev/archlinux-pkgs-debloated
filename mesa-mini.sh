@@ -11,11 +11,11 @@ common_vulkan=amd,virtio,gfxstream
 # drivers to build per architecture
 case "$ARCH" in
 	x86_64)
-		gallium_drivers=r600,crocus,iris,nouveau,svga,$common_gallium
+		gallium_drivers=r600,crocus,d3d12,iris,nouveau,svga,$common_gallium
 		vulkan_drivers=intel,intel_hasvk,$common_vulkan
 		;;
 	aarch64)
-		gallium_drivers=asahi,freedreno,etnaviv,lima,panfrost,v3d,vc4,nouveau,$common_gallium
+		gallium_drivers=asahi,d3d12,freedreno,etnaviv,lima,panfrost,v3d,vc4,nouveau,$common_gallium
 		vulkan_drivers=asahi,broadcom,freedreno,panfrost,imagination,$common_vulkan
 		;;
 	riscv64|loongarch64)
@@ -84,40 +84,45 @@ sed -i \
 	-e 's/intel-rt=enabled/intel-rt=disabled/'         \
 	-e 's/gallium-rusticl=true/gallium-rusticl=false/' \
 	-e 's/valgrind=enabled/valgrind=disabled/'         \
-	-e 's/-D video-codecs=all/-D video-codecs=all -D amd-use-llvm=false -D draw-use-llvm=false/' \
+	-e 's/-D video-codecs=all/-D video-codecs=all -D gallium-d3d12-video=disabled -D amd-use-llvm=false -D draw-use-llvm=false/' \
 	"$PKGBUILD"
 
 # Patch AMDGPU DRM version check for compatibility with older kernels
-sed -i '/^  cd mesa-\$_pkgver$/a\
-	echo "Patching amdgpu DRM version check..."\
-	find . -name "ac_gpu_info.c" -print -exec sed -i "s/info->drm_minor < 54/info->drm_minor < 0/" {} \\;' "$PKGBUILD"
-
 # Replace gen_perf.py with a stub to drop the Intel OA performance-counter
 # metrics (~4.5MiB of const data for GL_INTEL_performance_query). The stub keeps
 # the same generated API (no-op intel_oa_register_queries_*), so iris/crocus and
 # intel_perf.c compile/link unchanged; the perf query extension just reports no
 # counters at runtime. Saves ~5MiB in libgallium.
-sed -i '/^  cd mesa-\$_pkgver$/a\
-	echo "Patching gen_perf.py (drop Intel OA perf metrics)..."\
-	cat > src/intel/perf/gen_perf.py <<PYEOF\
-import os, sys\
-args = sys.argv[1:]\
-code = args[args.index("--code") + 1]\
-header = args[args.index("--header") + 1]\
-gens = [os.path.basename(x)[3:-4] for x in args if os.path.basename(x).startswith("oa-")]\
-NL = chr(10)\
-Q = chr(34)\
-open(header, "w").write("#pragma once" + NL + "struct intel_perf_config;" + NL + "".join("void intel_oa_register_queries_" + g + "(struct intel_perf_config *perf);" + NL for g in gens))\
-open(code, "w").write("#include " + Q + "perf/intel_perf_metrics.h" + Q + NL + "".join("void intel_oa_register_queries_" + g + "(struct intel_perf_config *perf) { (void)perf; }" + NL for g in gens))\
-PYEOF' "$PKGBUILD"
+intercept-prepare <<'BODY'
+	echo "Patching amdgpu DRM version check..."
+	find . -name ac_gpu_info.c -print \
+		-exec sed -i 's/info->drm_minor < 54/info->drm_minor < 0/' {} \;
+
+	echo "Patching gen_perf.py (drop Intel OA perf metrics)..."
+	cat > src/intel/perf/gen_perf.py <<'PY'
+import os, sys
+args = sys.argv[1:]
+code = args[args.index("--code") + 1]
+header = args[args.index("--header") + 1]
+gens = [os.path.basename(x)[3:-4] for x in args if os.path.basename(x).startswith("oa-")]
+NL = chr(10)
+Q = chr(34)
+open(header, "w").write("#pragma once" + NL + "struct intel_perf_config;" + NL + "".join("void intel_oa_register_queries_" + g + "(struct intel_perf_config *perf);" + NL for g in gens))
+open(code, "w").write("#include " + Q + "perf/intel_perf_metrics.h" + Q + NL + "".join("void intel_oa_register_queries_" + g + "(struct intel_perf_config *perf) { (void)perf; }" + NL for g in gens))
+PY
+
+	# fail loudly instead of silently shipping a package without the debloat
+	grep -q intel_oa_register_queries_ src/intel/perf/gen_perf.py || {
+		>&2 echo "Failed to patch gen_perf.py!"
+		return 1
+	}
+	[ -n "$(find . -name ac_gpu_info.c -exec grep -l 'drm_minor < 0' {} +)" ] || {
+		>&2 echo "Failed to patch ac_gpu_info.c!"
+		return 1
+	}
+BODY
 
 cat "$PKGBUILD"
-
-# fail loudly instead of silently shipping a package without the debloat.
-if ! grep -q "Patching gen_perf.py" "$PKGBUILD"; then
-	>&2 echo "Failed to patch gen_perf.py!"
-	exit 1
-fi
 
 # Do not build if version does not match with upstream
 if check-upstream-version; then

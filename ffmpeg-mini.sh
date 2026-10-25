@@ -36,7 +36,10 @@ sed -i \
 # profiles.c has to be patched together with codec_desc.c, because codec_desc.c
 # refers to the ff_*_profiles tables and the link of the programs fails without
 # them.
-sed -i '/^prepare() {/,/^}/ s|^  cd ffmpeg$|&\n  sed -i "s/NULL_IF_CONFIG_SMALL(\\(.*\\)),\\$/\\1,/" libavcodec/codec_desc.c\n  sed -i "s/^#if !CONFIG_SMALL\\$/#if 1/" libavcodec/profiles.c|' "$PKGBUILD"
+intercept-prepare <<'EOF'
+	sed -i 's/NULL_IF_CONFIG_SMALL(\(.*\)),$/\1,/' libavcodec/codec_desc.c
+	sed -i 's/^#if !CONFIG_SMALL$/#if 1/' libavcodec/profiles.c
+EOF
 
 cat "$PKGBUILD"
 

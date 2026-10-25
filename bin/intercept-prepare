@@ -1,0 +1,54 @@
+#!/bin/sh
+# Append a prepare() to $PKGBUILD that runs the given commands after the
+# PKGBUILD's own prepare().
+#
+#   intercept-prepare <<'EOF'
+#   	echo "patching..."
+#   	sed -i 's/foo/bar/' file.c
+#   EOF
+#
+#   intercept-prepare <body.sh>
+#
+# The commands run once the original prepare() has run, which is where upstream
+# unpacks the sources and cds into them, so paths are relative to the source
+# directory and its patches are already applied.
+
+set -eu
+
+if [ ! -f "${PKGBUILD:-}" ]; then
+	>&2 echo "ERROR: PKGBUILD env var is not set or file not found"
+	exit 1
+fi
+
+if [ $# -gt 0 ]; then
+	BODY=$1
+	if [ ! -f "$BODY" ]; then
+		>&2 echo "ERROR: $BODY not found"
+		exit 1
+	fi
+else
+	BODY=$(mktemp)
+	trap 'rm -f "$BODY"' EXIT
+	cat > "$BODY"
+fi
+
+{
+	echo
+	# the original prepare() is captured when the PKGBUILD is sourced, not
+	# now, so this has to stay unexpanded. the guard keeps a second copy of
+	# this block from capturing the wrapper as the upstream prepare(), which
+	# would recurse until the stack runs out
+	cat <<'EOF'
+if ! declare -f _upstream_prepare >/dev/null; then
+	_upstream_prepare() { :; }
+	if declare -f prepare >/dev/null; then
+		eval "_upstream_prepare() $(declare -f prepare | tail -n +2)"
+	fi
+fi
+prepare() {
+	_upstream_prepare
+EOF
+	cat "$BODY"
+	[ -z "$(tail -c 1 "$BODY")" ] || echo
+	echo '}'
+} >> "$PKGBUILD"
