@@ -5,29 +5,29 @@ set -e
 get-pkgbuild
 cd "$BUILD_DIR"
 
-common_gallium=radeonsi,softpipe,virgl,zink
+common_gallium=softpipe,virgl,zink
 common_vulkan=amd,virtio,gfxstream
 
 # drivers to build per architecture
 case "$ARCH" in
 	x86_64)
-		gallium_drivers=r600,crocus,d3d12,iris,nouveau,svga,$common_gallium
+		gallium_drivers=r600,crocus,d3d12,iris,nouveau,svga,radeonsi,$common_gallium
 		vulkan_drivers=intel,intel_hasvk,$common_vulkan
 		;;
 	aarch64)
-		gallium_drivers=asahi,d3d12,freedreno,etnaviv,lima,panfrost,v3d,vc4,nouveau,$common_gallium
+		gallium_drivers=asahi,d3d12,freedreno,etnaviv,lima,panfrost,v3d,vc4,nouveau,radeonsi,$common_gallium
 		vulkan_drivers=asahi,broadcom,freedreno,panfrost,imagination,$common_vulkan
 		;;
 	riscv64|loongarch64)
-		gallium_drivers=$common_gallium
+		gallium_drivers=radeonsi,$common_gallium
 		vulkan_drivers=
 		;;
 	ppc64le)
-		gallium_drivers=r600,nouveau,$common_gallium
+		gallium_drivers=r600,nouveau,radeonsi,$common_gallium
 		vulkan_drivers=
 		;;
 	ppc64)
-		gallium_drivers=r300,r600,$common_gallium
+		gallium_drivers=r300,r600,nouveau,$common_gallium
 		vulkan_drivers=
 		;;
 esac
