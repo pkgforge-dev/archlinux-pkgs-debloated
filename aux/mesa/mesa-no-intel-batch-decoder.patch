@@ -1,0 +1,14 @@
+diff --git a/src/intel/decoder/meson.build b/src/intel/decoder/meson.build
+index 22d4a0f..34fc5ab 100644
+--- a/src/intel/decoder/meson.build
++++ b/src/intel/decoder/meson.build
+@@ -9,7 +9,8 @@ libintel_decoder_deps = [
+   idep_intel_dev
+ ]
+ 
+-if not dep_expat.found()
++# Use the stub instead of the real decoder, which embeds a compressed genxml blob.
++if true
+   libintel_decoder_files += files(
+     'intel_batch_decoder_stub.c',
+   )
