@@ -5,6 +5,8 @@ set -e
 sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
 
 get-pkgbuild
+
+cp -rv ./aux/mesa "$BUILD_DIR"/mesa-patches
 cd "$BUILD_DIR"
 
 common_gallium=softpipe,virgl,zink
@@ -112,6 +114,17 @@ Q = chr(34)
 open(header, "w").write("#pragma once" + NL + "struct intel_perf_config;" + NL + "".join("void intel_oa_register_queries_" + g + "(struct intel_perf_config *perf);" + NL for g in gens))
 open(code, "w").write("#include " + Q + "perf/intel_perf_metrics.h" + Q + NL + "".join("void intel_oa_register_queries_" + g + "(struct intel_perf_config *perf) { (void)perf; }" + NL for g in gens))
 PY
+
+	# Size patches, see aux/mesa. Each one drops a debug or developer feature:
+	#  no-intel-batch-decoder: INTEL_DEBUG=bat prints a warning, drops the genxml blob
+	#  no-nouveau-push-print: NOUVEAU debug pushbuf dumps are raw hex
+	for _p in no-intel-batch-decoder no-nouveau-push-print; do
+		echo "Applying mesa-$_p.patch..."
+		patch -Np1 -i "$BUILD_DIR"/mesa-patches/mesa-"$_p".patch || {
+			>&2 echo "Failed to apply mesa-$_p.patch!"
+			return 1
+		}
+	done
 
 	# fail loudly instead of silently shipping a package without the debloat
 	grep -q intel_oa_register_queries_ src/intel/perf/gen_perf.py || {
