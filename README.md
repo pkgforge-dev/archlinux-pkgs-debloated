@@ -8,6 +8,8 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 * `mesa-mini` and `vulkan-{radeon,intel,etc}-mini` remove linking to `libLLVM.so`, making any hardware accelerated app tiny as result.
 
+  Also built without some developer-only features: Intel OA performance counters (`GL_INTEL_performance_query`), `INTEL_DEBUG=bat` batch decoding and decoded NOUVEAU push buffer dumps. The patches are in `aux/mesa`.
+
 * `mesa-nano` and `vulkan-{radeon,intel,etc}-nano` similar to `mesa-mini`, built with -Os which makes it ~30% smaller. Note -Os can have a performance and even stability issue so do not use this package in apps like emulators where this is critical.
 
 * `llvm-libs-mini` smaller version of `libLLVM.so` which is a 150+ MiB library, this version is reduced down to 99 MiB.

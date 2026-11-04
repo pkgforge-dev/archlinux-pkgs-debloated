@@ -1,0 +1,23 @@
+diff --git a/src/gallium/winsys/nouveau/drm/nouveau.c b/src/gallium/winsys/nouveau/drm/nouveau.c
+index d515c23..627d2e5 100644
+--- a/src/gallium/winsys/nouveau/drm/nouveau.c
++++ b/src/gallium/winsys/nouveau/drm/nouveau.c
+@@ -1132,16 +1132,8 @@ pushbuf_dump(struct nouveau_device *dev,
+       if (!bo->map)
+          continue;
+ 
+-      if (dev->info.cls_eng3d) {
+-         struct nv_push push = {
+-            .start = bgn,
+-            .end = end
+-         };
+-         vk_push_print(nouveau_out, &push, &dev->info);
+-      } else {
+-         while (bgn < end)
+-            err("\t0x%08x\n", *bgn++);
+-      }
++      while (bgn < end)
++         err("\t0x%08x\n", *bgn++);
+    }
+ }
+ 
