@@ -31,6 +31,20 @@ sed -i 's|rm -r|rm -rf|' "$PKGBUILD"
 intercept-prepare <<'EOF'
 	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp
 	sed -i "s|#if ENABLE(DEVELOPER_MODE)|#if 1|" Source/WebKit/UIProcess/Launcher/glib/BubblewrapLauncher.cpp
+	# ScriptExecutable.cpp uses CompilationResult under ENABLE(JIT) but only gets
+	# its definition from a neighbour in the same unified source, and disabling
+	# features here reshuffles those groups
+	sed -i 's|#include "CodeBlock.h"|&\n#include "CompilationResult.h"|' Source/JavaScriptCore/runtime/ScriptExecutable.cpp
+
+	# 2.54 includes the Skia backend unconditionally although USE_SKIA/USE_CAIRO
+	# still exist and the cairo backend is still shipped
+	sed -i 's|^SET_AND_EXPOSE_TO_BUILD(USE_CAIRO OFF)$|if (USE_SKIA)\n    SET_AND_EXPOSE_TO_BUILD(USE_CAIRO FALSE)\nelse ()\n    SET_AND_EXPOSE_TO_BUILD(USE_CAIRO TRUE)\nendif ()|' Source/cmake/OptionsGTK.cmake
+	sed -i 's|^include(Platform/Skia.cmake)$|if (USE_SKIA)\n    include(Platform/Skia.cmake)\nendif ()|' Source/WebKit/PlatformGTK.cmake
+	sed -i 's|^include(platform/Skia.cmake)$|if (USE_SKIA)\n    include(platform/Skia.cmake)\nelse ()\n    include(platform/Cairo.cmake)\nendif ()|' Source/WebCore/PlatformGTK.cmake
+
+	# B3 is only enabled when FTL is on, but wasm uses its types behind ENABLE(JIT)
+	sed -i 's|^#if !PLATFORM(PLAYSTATION) && ENABLE(JIT)$|#if !PLATFORM(PLAYSTATION) \&\& ENABLE(JIT) \&\& ENABLE(B3_JIT)|' \
+		Source/JavaScriptCore/wasm/WasmAddressType.h Source/JavaScriptCore/wasm/WasmAddressType.cpp
 EOF
 
 cat "$PKGBUILD"
