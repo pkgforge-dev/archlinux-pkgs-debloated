@@ -45,7 +45,12 @@ case "$ARCH" in
 	*)             PKGARCH=$ARCH ;;
 esac
 if ! grep -q "arch=.*$PKGARCH" "$PKGBUILD"; then
-	sed -i -e "s|x86_64|$PKGARCH|" "$PKGBUILD"
+	sed -i \
+		-e "s|(x86_64|($PKGARCH|"       \
+		-e "s| x86_64| $PKGARCH|"       \
+		-e "s|'x86_64'|'$PKGARCH'|"     \
+		-e "s|\"x86_64\"|\"$PKGARCH\"|" \
+		"$PKGBUILD"
 fi
 
 # always build without debug info

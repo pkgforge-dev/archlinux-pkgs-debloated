@@ -22,6 +22,10 @@ sed -i \
 	-e 's|rm -r|#rm -r|' \
 	"$PKGBUILD"
 
+# the nvptx offload and libclc runtimes need the NVPTX target, which is not built
+sed -i -e 's|amdgcn-amd-amdhsa nvptx64-nvidia-cuda|amdgcn-amd-amdhsa|' \
+       -e '/^[[:space:]]*nvptx64-nvidia-cuda$/d' "$PKGBUILD"
+
 # disable tests (they take too long)
 sed -i -e 's|LD_LIBRARY_PATH|#LD_LIBRARY_PATH|' "$PKGBUILD"
 
