@@ -135,7 +135,7 @@ jobs:
       security-events: write
       contents: write
       packages: read
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     continue-on-error: true
     strategy:
       fail-fast: false
