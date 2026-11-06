@@ -19,10 +19,16 @@ sed -i '/-D USE_SOUP2=OFF/a\
 	-D ENABLE_FTL_JIT=OFF\
 	-D ENABLE_JAVASCRIPT_SHELL=OFF\
 	-D ENABLE_SAMPLING_PROFILER=OFF\
-	-D USE_SKIA=OFF\
 	-D ENABLE_WEBDRIVER=OFF\
 	-D USE_SYSPROF_CAPTURE=OFF\
+	-D ENABLE_WEBGL=OFF\
 	-D ENABLE_JOURNALD_LOG=OFF' "$PKGBUILD"
+
+# the -docs package is thrown away, so do not build or move the docs
+sed -i \
+	-e 's|-D ENABLE_DOCUMENTATION=ON|-D ENABLE_DOCUMENTATION=OFF|' \
+	-e '/mv {"\$pkgdir",doc}\/usr\/share\/doc/d' \
+	"$PKGBUILD"
 
 # rm -r fails when target dir doesn't exist
 sed -i 's|rm -r|rm -rf|' "$PKGBUILD"
@@ -35,12 +41,6 @@ intercept-prepare <<'EOF'
 	# its definition from a neighbour in the same unified source, and disabling
 	# features here reshuffles those groups
 	sed -i 's|#include "CodeBlock.h"|&\n#include "CompilationResult.h"|' Source/JavaScriptCore/runtime/ScriptExecutable.cpp
-
-	# 2.54 includes the Skia backend unconditionally although USE_SKIA/USE_CAIRO
-	# still exist and the cairo backend is still shipped
-	sed -i 's|^SET_AND_EXPOSE_TO_BUILD(USE_CAIRO OFF)$|if (USE_SKIA)\n    SET_AND_EXPOSE_TO_BUILD(USE_CAIRO FALSE)\nelse ()\n    SET_AND_EXPOSE_TO_BUILD(USE_CAIRO TRUE)\nendif ()|' Source/cmake/OptionsGTK.cmake
-	sed -i 's|^include(Platform/Skia.cmake)$|if (USE_SKIA)\n    include(Platform/Skia.cmake)\nendif ()|' Source/WebKit/PlatformGTK.cmake
-	sed -i 's|^include(platform/Skia.cmake)$|if (USE_SKIA)\n    include(platform/Skia.cmake)\nelse ()\n    include(platform/Cairo.cmake)\nendif ()|' Source/WebCore/PlatformGTK.cmake
 
 	# B3 is only enabled when FTL is on, but wasm uses its types behind ENABLE(JIT)
 	sed -i 's|^#if !PLATFORM(PLAYSTATION) && ENABLE(JIT)$|#if !PLATFORM(PLAYSTATION) \&\& ENABLE(JIT) \&\& ENABLE(B3_JIT)|' \
