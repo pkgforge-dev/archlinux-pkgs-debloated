@@ -26,6 +26,14 @@ sed -i \
 sed -i -e 's|amdgcn-amd-amdhsa nvptx64-nvidia-cuda|amdgcn-amd-amdhsa|' \
        -e '/^[[:space:]]*nvptx64-nvidia-cuda$/d' "$PKGBUILD"
 
+# the wasi runtimes need the WebAssembly target, which is not built either
+# (ALARM drops the same packages, so this is a no-op on aarch64)
+sed -i \
+	-e '/^  # wasi-compiler-rt: baremetal compiler-rt for wasm32)$/,/^  done$/d' \
+	-e '/^package_wasi-.*() {/,/^}$/d' \
+	-e "s| 'wasi-[a-z+-]*'||g" \
+	"$PKGBUILD"
+
 # disable tests (they take too long)
 sed -i -e 's|LD_LIBRARY_PATH|#LD_LIBRARY_PATH|' "$PKGBUILD"
 
