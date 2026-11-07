@@ -2,6 +2,8 @@
 
 set -e
 
+pacman -S --noconfirm patchelf
+
 sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
 
 get-pkgbuild
@@ -148,6 +150,9 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
+
+check-no-llvm ./mesa-*.pkg.tar.zst ./vulkan-*.pkg.tar.zst
+
 mv -v ./mesa-*.pkg.tar.zst ../mesa-nano-"$ARCH".pkg.tar.zst
 
 # the ported arches build no vulkan drivers

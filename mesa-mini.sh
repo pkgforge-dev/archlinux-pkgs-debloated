@@ -2,6 +2,8 @@
 
 set -e
 
+pacman -S --noconfirm patchelf
+
 get-pkgbuild
 
 cp -rv ./aux/mesa "$BUILD_DIR"/mesa-patches
@@ -146,6 +148,9 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
+
+check-no-llvm ./mesa-*.pkg.tar.zst ./vulkan-*.pkg.tar.zst
+
 mv -v ./mesa-*.pkg.tar.zst ../mesa-mini-"$ARCH".pkg.tar.zst
 
 # the ported arches build no vulkan drivers
