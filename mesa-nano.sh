@@ -2,6 +2,8 @@
 
 set -e
 
+pacman -S --noconfirm patchelf
+
 sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
 
 get-pkgbuild
@@ -167,6 +169,8 @@ case "$ARCH" in
 		mv -v ./vulkan-powervr-*.pkg.tar.zst   ../vulkan-powervr-nano-"$ARCH".pkg.tar.zst
 		;;
 esac
+
+check-no-llvm ../*.pkg.tar.zst
 
 echo "All done!"
 

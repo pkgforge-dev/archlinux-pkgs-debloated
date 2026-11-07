@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# Fail when a built driver links against llvm.
+
+set -e
+
+temp_dir=${TMPDIR:-/tmp}/.check-no-llvm.$$
+
+if [ -z "$1" ]; then
+	>&2 echo "No package to check was given"
+	exit 1
+elif ! command -v patchelf 1>/dev/null; then
+	>&2 echo "Missing dependency: patchelf"
+	exit 1
+fi
+
+rm -rf "$temp_dir"
+mkdir "$temp_dir"
+
+for pkg do
+	tar -xf "$pkg" -C "$temp_dir"
+done
+
+set -- \
+	"$temp_dir"/*.so*     \
+	"$temp_dir"/*/*.so*   \
+	"$temp_dir"/*/*/*.so* \
+	"$temp_dir"/*/*/*/*.so*
+
+_match=0
+for so do
+	if [ ! -f "$so" ] || [ -L "$so" ]; then
+		continue
+	fi
+	_needed=$(patchelf --print-needed "$so" 2>/dev/null) || continue
+	case "$_needed" in
+		*libLLVM*)
+			>&2 echo "${so##*/} links against LLVM!!!"
+			echo "$_needed" | grep libLLVM
+			_match=1
+			;;
+	esac
+done
+
+rm -rf "$temp_dir"
+
+if [ "$_match" = 1 ]; then
+	>&2 echo "ERROR: drivers must not link against LLVM!!!"
+	exit 1
+fi
+
+echo "No driver links against LLVM :)"

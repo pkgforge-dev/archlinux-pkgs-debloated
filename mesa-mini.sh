@@ -2,6 +2,8 @@
 
 set -e
 
+pacman -S --noconfirm patchelf
+
 get-pkgbuild
 
 cp -rv ./aux/mesa "$BUILD_DIR"/mesa-patches
@@ -165,5 +167,7 @@ case "$ARCH" in
 		mv -v ./vulkan-powervr-*.pkg.tar.zst   ../vulkan-powervr-mini-"$ARCH".pkg.tar.zst
 		;;
 esac
+
+check-no-llvm ../*.pkg.tar.zst
 
 echo "All done!"
