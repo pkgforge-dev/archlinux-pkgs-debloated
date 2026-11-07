@@ -150,9 +150,6 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
-
-check-no-llvm ./mesa-*.pkg.tar.zst ./vulkan-*.pkg.tar.zst
-
 mv -v ./mesa-*.pkg.tar.zst ../mesa-nano-"$ARCH".pkg.tar.zst
 
 # the ported arches build no vulkan drivers
@@ -172,6 +169,8 @@ case "$ARCH" in
 		mv -v ./vulkan-powervr-*.pkg.tar.zst   ../vulkan-powervr-nano-"$ARCH".pkg.tar.zst
 		;;
 esac
+
+check-no-llvm ../*.pkg.tar.zst
 
 echo "All done!"
 
