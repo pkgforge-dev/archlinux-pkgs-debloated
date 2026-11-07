@@ -7,13 +7,31 @@ sed -i -e 's|-O2|-Os|' /etc/makepkg.conf
 get-pkgbuild
 cd "$BUILD_DIR"
 
-# debloat package, build with MinSizeRel
+case "$ARCH" in
+	'x86_64')  TARGETS_TO_BUILD="X86;AMDGPU"    ;;
+	'aarch64') TARGETS_TO_BUILD="AArch64;AMDGPU";;
+esac
+
+# debloat package, limit llvm targets, build with MinSizeRel
 sed -i \
 	-e 's|-DCMAKE_BUILD_TYPE=Release|-DCMAKE_BUILD_TYPE=MinSizeRel|' \
 	-e 's|-DLLVM_BUILD_TESTS=ON|-DLLVM_BUILD_TESTS=OFF -DLLVM_ENABLE_ASSERTIONS=OFF|' \
 	-e 's|-DLLVM_ENABLE_CURL=ON|-DLLVM_ENABLE_CURL=OFF -DLLVM_ENABLE_UNWIND_TABLES=OFF|' \
+	-e "s|-DLLVM_BUILD_DOCS=ON|-DLLVM_TARGETS_TO_BUILD=\"$TARGETS_TO_BUILD\"|" \
 	-e 's|-DLLVM_ENABLE_SPHINX=ON|-DLLVM_ENABLE_SPHINX=OFF|' \
 	-e 's|rm -r|#rm -r|' \
+	"$PKGBUILD"
+
+# the nvptx offload and libclc runtimes need the NVPTX target, which is not built
+sed -i -e 's|amdgcn-amd-amdhsa nvptx64-nvidia-cuda|amdgcn-amd-amdhsa|' \
+       -e '/^[[:space:]]*nvptx64-nvidia-cuda$/d' "$PKGBUILD"
+
+# the wasi runtimes need the WebAssembly target, which is not built either
+# (ALARM drops the same packages, so this is a no-op on aarch64)
+sed -i \
+	-e '/^  # wasi-compiler-rt: baremetal compiler-rt for wasm32)$/,/^  done$/d' \
+	-e '/^package_wasi-.*() {/,/^}$/d' \
+	-e "s| 'wasi-[a-z+-]*'||g" \
 	"$PKGBUILD"
 
 # disable tests (they take too long)
@@ -31,5 +49,7 @@ fi
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
 mv -v ./"$PACKAGE"-libs-*.pkg.tar.zst ../"$PACKAGE"-libs-mini-"$ARCH".pkg.tar.zst
+# the -nano name is gone, keep a copy for scripts that hardcode it
+cp -v ../"$PACKAGE"-libs-mini-"$ARCH".pkg.tar.zst ../"$PACKAGE"-libs-nano-"$ARCH".pkg.tar.zst
 
 echo "All done!"

@@ -40,7 +40,6 @@ jobs:
       matrix:
         script:
           - llvm-mini
-          - llvm-nano
           - libxml2-mini
           - qt6-base-mini
           - gtk3-mini
