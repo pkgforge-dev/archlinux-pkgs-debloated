@@ -27,8 +27,9 @@ set -- \
 
 _match=0
 for so do
-	[ -f "$so" ] || continue
-	[ -L "$so" ] || continue
+	if [ ! -f "$so" ] || [ -L "$so" ]; then
+		continue
+	fi
 	_needed=$(patchelf --print-needed "$so" 2>/dev/null) || continue
 	case "$_needed" in
 		*libLLVM*)
