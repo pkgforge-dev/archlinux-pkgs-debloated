@@ -9,13 +9,15 @@ temp_dir=${TMPDIR:-/tmp}/.check-no-llvm.$$
 if [ -z "$1" ]; then
 	>&2 echo "No package to check was given"
 	exit 1
+elif ! command -v patchelf 1>/dev/null; then
+	>&2 echo "Missing dependency: patchelf"
+	exit 1
 fi
 
 rm -rf "$temp_dir"
 mkdir "$temp_dir"
 
 for pkg do
-	[ -f "$pkg" ] || continue
 	tar -xf "$pkg" -C "$temp_dir"
 done
 
