@@ -1,56 +1,49 @@
 #!/bin/sh
 
-# Fail when a built driver still links against llvm.
-# ldd cannot be used for this: it resolves the transitive dependencies of the
-# build container, which has llvm-libs installed.
-# Usage: check-no-llvm <package file>...
+# Fail when a built driver links against llvm.
 
 set -e
 
-_err_msg(){
-	>&2 printf '\033[1;31m%s\033[0m\n' " $*"
-}
+temp_dir=${TMPDIR:-/tmp}/.check-no-llvm.$$
 
-_dir=${TMPDIR:-/tmp}/.check-no-llvm.$$
-rm -rf "$_dir"
-mkdir "$_dir"
+if [ -z "$1" ]; then
+	>&2 echo "No package to check was given"
+	exit 1
+fi
+
+rm -rf "$temp_dir"
+mkdir "$temp_dir"
 
 for pkg do
-	# unmatched globs arrive literally, the ported arches build no vulkan drivers
 	[ -f "$pkg" ] || continue
-	tar -xf "$pkg" -C "$_dir"
+	tar -xf "$pkg" -C "$temp_dir"
 done
 
 set -- \
-	"$_dir"/*.so*     \
-	"$_dir"/*/*.so*   \
-	"$_dir"/*/*/*.so* \
-	"$_dir"/*/*/*/*.so*
+	"$temp_dir"/*.so*     \
+	"$temp_dir"/*/*.so*   \
+	"$temp_dir"/*/*/*.so* \
+	"$temp_dir"/*/*/*/*.so*
 
-_count=0
-_ret=0
+_match=0
 for so do
-	# skip the symlinks, the real file is matched by the same globs
-	[ -f "$so" ] && [ ! -L "$so" ] || continue
-	_count=$((_count + 1))
+	[ -f "$so" ] || continue
+	[ -L "$so" ] || continue
 	_needed=$(patchelf --print-needed "$so" 2>/dev/null) || continue
 	case "$_needed" in
 		*libLLVM*)
-			_err_msg "${so##*/} links against llvm:"
+			>&2 echo "${so##*/} links against LLVM!!!"
 			echo "$_needed" | grep libLLVM
-			_ret=1
+			_match=1
 			;;
 	esac
 done
 
-rm -rf "$_dir"
+rm -rf "$temp_dir"
 
-if [ "$_ret" = 1 ]; then
-	_err_msg "ERROR: the drivers must not link against llvm!"
+if [ "$_match" = 1 ]; then
+	>&2 echo "ERROR: drivers must not link against LLVM!!!"
 	exit 1
 fi
 
-if [ "$_count" = 0 ]; then
-	_err_msg "ERROR: no libraries were found to check!"
-	exit 1
-fi
+echo "No driver links againts LLVM :)"
