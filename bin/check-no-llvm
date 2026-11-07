@@ -49,4 +49,4 @@ if [ "$_match" = 1 ]; then
 	exit 1
 fi
 
-echo "No driver links againts LLVM :)"
+echo "No driver links against LLVM :)"
