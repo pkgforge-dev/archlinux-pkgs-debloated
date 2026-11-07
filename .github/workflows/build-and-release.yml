@@ -39,7 +39,6 @@ jobs:
       fail-fast: false
       matrix:
         script:
-          - llvm-mini
           - llvm-nano
           - libxml2-mini
           - qt6-base-mini
