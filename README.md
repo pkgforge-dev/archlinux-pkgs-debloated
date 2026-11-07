@@ -12,9 +12,9 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 * `mesa-nano` and `vulkan-{radeon,intel,etc}-nano` similar to `mesa-mini`, built with -Os which makes it ~30% smaller. Note -Os can have a performance and even stability issue so do not use this package in apps like emulators where this is critical.
 
-* `llvm-libs-mini` smaller version of `libLLVM.so` which is a 150+ MiB library, this version is reduced down to 99 MiB.
+* `llvm-libs-mini` smaller version of `libLLVM.so` which is a 150+ MiB library. The llvm targets are limited to the host architecture (`x86_64` or `aarch64`) plus `AMDGPU`, which reduces the size of the library to less than 75 MiB. Note this will cause issues if an application depends on more llvm targets, like compilers.
 
-* `llvm-libs-nano`, similar to `mini`, but with the llvm targets limited (`x86_64` or `aarch64`) + `AMDGPU`, this reduces the size of the library to less than 70 MiB. Note this will cause issues if application depends on more llvm targets like compilers.
+* `llvm-libs-nano` is a copy of `llvm-libs-mini`, kept for backwards compatibility with scripts that hardcode the `-nano` name.
 
 * `qt6-base-mini` and `libxml2-mini`, remove 30 MiB libicudata lib dependency.
 

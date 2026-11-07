@@ -48,6 +48,8 @@ fi
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*
-mv -v ./"$PACKAGE"-libs-*.pkg.tar.zst ../"$PACKAGE"-libs-nano-"$ARCH".pkg.tar.zst
+mv -v ./"$PACKAGE"-libs-*.pkg.tar.zst ../"$PACKAGE"-libs-mini-"$ARCH".pkg.tar.zst
+# the -nano name is gone, keep a copy for scripts that hardcode it
+cp -v ../"$PACKAGE"-libs-mini-"$ARCH".pkg.tar.zst ../"$PACKAGE"-libs-nano-"$ARCH".pkg.tar.zst
 
 echo "All done!"
