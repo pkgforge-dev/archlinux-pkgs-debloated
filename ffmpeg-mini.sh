@@ -11,6 +11,9 @@ cd "$BUILD_DIR"
 # remove a lot of image formats support and other stuff like opencore
 # a lot of these changes make ffmpeg more similar to what void and alpine do
 # so they should not cause issues to most applications
+# sndio is an OpenBSD audio API, ffmpeg only uses it for the sndio indev and
+# outdev of libavdevice and nothing here runs an sndiod, dropping it also drops
+# the libbsd and libmd it pulls in
 sed -i \
 	-e '/x265/d'                                \
 	-e '/aom/d'                                 \
@@ -25,9 +28,16 @@ sed -i \
 	-e '/librsvg/d'                             \
 	-e '/libopenjpeg/d'                         \
 	-e '/--enable-libsvtav1/d'                  \
+	-e '/^  sndio$/d'                           \
 	-e 's/--enable-vapoursynth/--enable-small/' \
 	-e 's/--enable-libglslang/--disable-vdpau/' \
 	"$PKGBUILD"
+
+# dropping the dependency is not enough, ffmpeg autodetects sndio: without the
+# flag libsndio comes back the day anything else in the build pulls it in and
+# the package ends up linking a library it does not declare
+sed -i '/--disable-stripping \\/a\
+    --disable-sndio \\' "$PKGBUILD"
 
 # --enable-small makes ffmpeg drop the human readable codec names
 # (NULL_IF_CONFIG_SMALL in libavcodec/codec_desc.c) and the profile name tables
@@ -42,6 +52,12 @@ intercept-prepare <<'EOF'
 EOF
 
 cat "$PKGBUILD"
+
+# fail loudly instead of silently shipping a package that still links sndio
+if grep -q '^  sndio$' "$PKGBUILD" || ! grep -q -- '--disable-sndio' "$PKGBUILD"; then
+	>&2 echo "Failed to debloat ffmpeg PKGBUILD!"
+	exit 1
+fi
 
 # Do not build if version does not match with upstream
 if check-upstream-version; then
