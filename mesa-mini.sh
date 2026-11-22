@@ -99,8 +99,12 @@ sed -i \
 # counters at runtime. Saves ~5MiB in libgallium.
 intercept-prepare <<'BODY'
 	echo "Patching amdgpu DRM version check..."
+	# mesa moved the minor that the check compares against into
+	# AC_AMDGPU_DRM_MINOR, older releases hardcode it there
 	find . -name ac_gpu_info.c -print \
 		-exec sed -i 's/info->drm_minor < 54/info->drm_minor < 0/' {} \;
+	find . -name amd_family.h -print \
+		-exec sed -i 's/^#define AC_AMDGPU_DRM_MINOR .*/#define AC_AMDGPU_DRM_MINOR 0/' {} \;
 
 	echo "Patching gen_perf.py (drop Intel OA perf metrics)..."
 	cat > src/intel/perf/gen_perf.py <<'PY'
@@ -131,10 +135,11 @@ PY
 		>&2 echo "Failed to patch gen_perf.py!"
 		return 1
 	}
-	[ -n "$(find . -name ac_gpu_info.c -exec grep -l 'drm_minor < 0' {} +)" ] || {
-		>&2 echo "Failed to patch ac_gpu_info.c!"
+	if ! grep -rq --include=ac_gpu_info.c 'drm_minor < 0' . &&
+	   ! grep -rq --include=amd_family.h '^#define AC_AMDGPU_DRM_MINOR 0' .; then
+		>&2 echo "Failed to patch the amdgpu DRM version check!"
 		return 1
-	}
+	fi
 BODY
 
 cat "$PKGBUILD"
