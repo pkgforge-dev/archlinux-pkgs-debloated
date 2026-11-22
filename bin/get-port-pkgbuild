@@ -9,7 +9,10 @@
 set -eu
 
 ARCH_REPO=https://gitlab.archlinux.org/archlinux/packaging/packages
-POWER_REPO=https://git.archlinuxpower.org/ArchPOWER/packages
+# git.archlinuxpower.org answers 403 to GitHub runner addresses, so clone the
+# GitHub mirror of the same repository: its master is the identical commit as
+# the origin's master
+POWER_REPO=https://github.com/kth5/archpower
 RISCV_REPO=https://github.com/felixonmars/archriscv-packages
 LOONG_REPO=https://github.com/lcpu-club/loongarch-packages
 
