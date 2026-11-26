@@ -25,7 +25,7 @@ on:
         required: false
         default: '0'
       REGENERATE_INDEX_ONLY:
-        description: 'Set to 1 to skip building packages and only regenerate packages.txt and common-{mini,nano}-<arch>.tar bundles'
+        description: 'Set to 1 to skip building packages and only regenerate packages.txt'
         required: false
         default: '0'
 jobs:
@@ -128,15 +128,14 @@ jobs:
             dist/*.pkg.tar.zst
             dist/*.pkgver
 
-      # Regenerate packages.txt (and this arch's common bundles if a package
-      # was actually built and uploaded) right away so consumers see the update
-      # without waiting for the rest of the matrix.
-      - name: update packages.txt and bundles
+      # Regenerate packages.txt right away when a package is built and
+      # uploaded so consumers see the update without waiting for the rest of
+      # the matrix.
+      - name: update packages.txt
         if: ${{ github.ref_name == 'main' && (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BUNDLE_ARCH: ${{ matrix.arch }}
         run: |
           if ls dist/*.pkg.tar.zst >/dev/null 2>&1; then
             /bin/sh ./bin/update-release-index
@@ -253,12 +252,11 @@ jobs:
             dist/*.pkg.tar.zst
             dist/*.pkgver
 
-      - name: update packages.txt and bundles
+      - name: update packages.txt
         if: ${{ github.ref_name == 'main' && (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BUNDLE_ARCH: ${{ matrix.arch }}
         run: |
           if ls dist/*.pkg.tar.zst >/dev/null 2>&1; then
             /bin/sh ./bin/update-release-index
@@ -268,7 +266,7 @@ jobs:
   # concurrent updates during matrix execution), and also runs standalone when
   # REGENERATE_INDEX_ONLY=1 is triggered manually.
   update-index:
-    name: "Update packages.txt & common bundles"
+    name: "Update packages.txt"
     needs: [build, build-emulated]
     if: ${{ always() && github.ref_name == 'main' && !cancelled() }}
     permissions:
@@ -279,8 +277,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Regenerate packages.txt and common bundles
+      - name: Regenerate packages.txt
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BUNDLE_ARCH: ${{ github.event.inputs.ARCH }}
         run: /bin/sh ./bin/update-release-index
