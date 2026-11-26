@@ -24,10 +24,14 @@ on:
         description: 'Set to 1 to skip the emulated architectures (riscv64, loongarch64, ppc64le, ppc64) and only build x86_64/aarch64'
         required: false
         default: '0'
+      REGENERATE_INDEX_ONLY:
+        description: 'Set to 1 to skip building packages and only regenerate packages.txt'
+        required: false
+        default: '0'
 jobs:
   build:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
-    if: ${{ github.event.inputs.ARCH == '' || github.event.inputs.ARCH == 'x86_64' || github.event.inputs.ARCH == 'aarch64' }}
+    if: ${{ github.event.inputs.REGENERATE_INDEX_ONLY != '1' && (github.event.inputs.ARCH == '' || github.event.inputs.ARCH == 'x86_64' || github.event.inputs.ARCH == 'aarch64') }}
     permissions:
       actions: read
       security-events: write
@@ -128,7 +132,7 @@ jobs:
   # are confirmed to build are part of the matrix for now
   build-emulated:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
-    if: ${{ github.event.inputs.SKIP_EMULATED != '1' && (github.event.inputs.ARCH == '' || (github.event.inputs.ARCH != 'x86_64' && github.event.inputs.ARCH != 'aarch64')) }}
+    if: ${{ github.event.inputs.REGENERATE_INDEX_ONLY != '1' && github.event.inputs.SKIP_EMULATED != '1' && (github.event.inputs.ARCH == '' || (github.event.inputs.ARCH != 'x86_64' && github.event.inputs.ARCH != 'aarch64')) }}
     permissions:
       actions: read
       security-events: write
@@ -234,3 +238,22 @@ jobs:
           files: |
             dist/*.pkg.tar.zst
             dist/*.pkgver
+
+  # Runs after the build matrix finishes (and standalone when REGENERATE_INDEX_ONLY=1)
+  # to publish packages.txt to the continuous release.
+  update-index:
+    name: "Update packages.txt"
+    needs: [build, build-emulated]
+    if: ${{ always() && github.ref_name == 'main' && !cancelled() }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-slim
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Regenerate packages.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: /bin/sh ./bin/update-release-index
