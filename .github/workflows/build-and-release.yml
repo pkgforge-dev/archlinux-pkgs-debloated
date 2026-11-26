@@ -128,19 +128,6 @@ jobs:
             dist/*.pkg.tar.zst
             dist/*.pkgver
 
-      # Regenerate packages.txt right away when a package is built and
-      # uploaded so consumers see the update without waiting for the rest of
-      # the matrix.
-      - name: update packages.txt
-        if: ${{ github.ref_name == 'main' && (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if ls dist/*.pkg.tar.zst >/dev/null 2>&1; then
-            /bin/sh ./bin/update-release-index
-          fi
-
   # foreign arches run through qemu user emulation, only the packages that
   # are confirmed to build are part of the matrix for now
   build-emulated:
@@ -252,26 +239,15 @@ jobs:
             dist/*.pkg.tar.zst
             dist/*.pkgver
 
-      - name: update packages.txt
-        if: ${{ github.ref_name == 'main' && (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if ls dist/*.pkg.tar.zst >/dev/null 2>&1; then
-            /bin/sh ./bin/update-release-index
-          fi
-
-  # Final authoritative pass after all build jobs complete (reconciles any
-  # concurrent updates during matrix execution), and also runs standalone when
-  # REGENERATE_INDEX_ONLY=1 is triggered manually.
+  # Runs after the build matrix finishes (and standalone when REGENERATE_INDEX_ONLY=1)
+  # to publish packages.txt to the continuous release.
   update-index:
     name: "Update packages.txt"
     needs: [build, build-emulated]
     if: ${{ always() && github.ref_name == 'main' && !cancelled() }}
     permissions:
       contents: write
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
