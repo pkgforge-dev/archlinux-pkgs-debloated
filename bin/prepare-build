@@ -7,7 +7,9 @@ echo "------------------------------------------------------------"
 # Only install what the version check needs; check-upstream-version installs
 # the build dependencies when a package is actually going to be built.
 echo "Installing the packages needed to check versions..."
-pacman -Syu --needed --noconfirm \
+# -Sy keeps skip jobs from applying a full upgrade; the upgrade before a build
+# happens in install_build_deps
+pacman -Sy --needed --noconfirm \
 	git   \
 	patch \
 	wget

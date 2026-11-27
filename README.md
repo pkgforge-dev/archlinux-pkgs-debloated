@@ -57,12 +57,12 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 # CI
 
 Build jobs run inside `ghcr.io/pkgforge-dev/archlinux:<arch>`, which is refreshed
-daily. `prepare-build` upgrades the system and installs only what the version
-check needs (`git`, `patch` and `wget`). The build dependencies (`base-devel`,
-`ccache`, `clang`, `cmake`, `curl`, `git`, `mold`, `ninja` and `wget`) are
-installed by `bin/check-upstream-version` only when a package is actually going
-to be built, so jobs that skip an already released version never download the
-toolchain.
+daily. `prepare-build` syncs the package database and installs only what the
+version check needs (`git`, `patch` and `wget`). The build dependencies
+(`base-devel`, `ccache`, `clang`, `cmake`, `curl`, `git`, `mold`, `ninja` and
+`wget`) are installed by `bin/check-upstream-version` only when a package is
+actually going to be built, so jobs that skip an already released version never
+download the toolchain.
 
 This replaced the per-arch `archlinux-builder` image. Pulling that ~640 MiB image
 cost as much as installing the toolchain (~260 MiB of packages), and every job
@@ -75,9 +75,10 @@ The `x86_64` and `aarch64` jobs run daily at 15:17 UTC. The emulated jobs run
 at 03:00 UTC on days 1, 6, 11, 16, 21, 26 and 31 of each month.
 
 An already released package version skips compilation and package uploads.
-`glycin-mini`, `libdecor-mini`, and `mangohud-mini` on `aarch64` have no
-matching target repository package, so they check only the released version.
-Use `FORCE_BUILD=1` to explicitly rebuild an unchanged version.
+`glycin-mini` and `libdecor-mini` build `glycin-ng` and `libdecor-rs`, and
+`mangohud` is not packaged for Arch Linux ARM, so there is no target repository
+version to compare. They check only the released version. Use `FORCE_BUILD=1`
+to explicitly rebuild an unchanged version.
 
 ## PKGBUILDs and version sync with the archlinux forks
 

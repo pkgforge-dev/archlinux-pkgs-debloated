@@ -21,6 +21,8 @@ install_build_deps() {
 		git        \
 		mold       \
 		ninja      \
+		patchelf   \
+		unzip      \
 		wget
 }
 
@@ -53,11 +55,18 @@ else
 	echo "----------------------------------------------------------------"
 fi
 
-if [ "$1" = --released-only ]; then
-	install_build_deps
-	echo "Building package..."
-	exit 0
-fi
+case "$1" in
+	--released-only)
+		install_build_deps
+		echo "Building package..."
+		exit 0
+		;;
+	'') : ;;
+	*)
+		>&2 echo "Unknown argument: $1"
+		exit 2
+		;;
+esac
 
 UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 
