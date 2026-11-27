@@ -3,9 +3,27 @@
 # This script compares the version of the PKGBUILD with the version that was
 # already released, and with the upstream version. This is to avoid rebuilding a
 # package that is already released and to avoid pushing packages that are too
-# new causing partial updates as result
+# new causing partial updates as result. Pass --released-only for a package
+# that has no version to match in the target repository.
 
 set -e
+
+# Keeps the system current and installs what makepkg needs. It only runs when
+# the version checks pass, so jobs that skip a package never install it.
+install_build_deps() {
+	echo "Installing build dependencies..."
+	pacman -Syu --needed --noconfirm \
+		base-devel \
+		ccache     \
+		clang      \
+		cmake      \
+		curl       \
+		git        \
+		ninja      \
+		patchelf   \
+		unzip      \
+		wget
+}
 
 pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' "$PKGBUILD")
 pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' "$PKGBUILD")
@@ -36,6 +54,19 @@ else
 	echo "----------------------------------------------------------------"
 fi
 
+case "$1" in
+	--released-only)
+		install_build_deps
+		echo "Building package..."
+		exit 0
+		;;
+	'') : ;;
+	*)
+		>&2 echo "Unknown argument: $1"
+		exit 2
+		;;
+esac
+
 UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 
 echo "UPSTREAM version: $UPSTREAM_VERSION"
@@ -47,5 +78,6 @@ elif [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
 	:> ~/OPERATION_ABORTED
 	exit 1
 fi
+install_build_deps
 echo "Building package..."
 echo "----------------------------------------------------------------"

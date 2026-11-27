@@ -30,7 +30,7 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 * `icu-mini` Much smaller version of `libicudata.so` that is less than 3 MIB in size (10x reduction in size).
 
-* `gtk2-mini` Builds `gtk2-ng-git`, a community-maintained fork of GTK2.
+* `gtk2-mini` Builds `gtk2-ng-git`, a community-maintained fork of GTK2. Not built at the moment, upstream is inactive.
 
 * `libdecor-mini` Builds [`libdecor-rs`](https://github.com/QaidVoid/libdecor-rs), rust implementation of libdecor without GTK/D-Bus dependencies (Ideal for SDL apps).
 
@@ -56,23 +56,29 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 # CI
 
-Build jobs run inside `ghcr.io/pkgforge-dev/archlinux-builder:<arch>`, an image
-that bakes in `base-devel`, `ccache`, `clang`, `cmake`, `curl`, `git`, `mold`,
-`ninja` and `wget` plus the initialized pacman keyring. The main win is keeping
-the toolchain in one place instead of installing it per job. On the
-GitHub-hosted native legs the ~2 GB image is pulled fresh on every job, so wall
-time there is roughly a wash versus installing the toolchain.
+Build jobs run inside `ghcr.io/pkgforge-dev/archlinux:<arch>`, which is refreshed
+daily. `prepare-build` syncs the package database and installs only what the
+version check needs (`git`, `patch` and `wget`). The build dependencies
+(`base-devel`, `ccache`, `clang`, `cmake`, `curl`, `git`, `ninja`,
+`patchelf`, `unzip` and `wget`) are installed by `bin/check-upstream-version`
+only when a package is actually going to be built, so jobs that skip an already
+released version never download the toolchain.
 
-The image is built per arch by the `build builder image` workflow and refreshed
-weekly, so its package database can be up to a week old; `prepare-build` falls
-back to the old `pacman -Syu` install when the toolchain is missing, which also
-keeps the workflow usable with a plain `ghcr.io/pkgforge-dev/archlinux` base.
+This replaced the per-arch `archlinux-builder` image. Pulling that ~640 MiB image
+cost as much as installing the toolchain (~260 MiB of packages), and every job
+paid for it even when it skipped the build. The plain ~190 MiB image is smaller
+and needs no image workflow to maintain.
 
-Run `build builder image` manually once before the first build after merging
-(and whenever the `Dockerfile` changes). That first run pushes the package as
-private; the build jobs have `packages: read` and `build-emulated` logs in to
-ghcr, so they can still pull it. Making the package public in its settings is
-optional but matches the other pkgforge images.
+## Automatic updates
+
+The `x86_64` and `aarch64` jobs run daily at 15:17 UTC. The emulated jobs run
+at 03:00 UTC on days 1, 6, 11, 16, 21, 26 and 31 of each month.
+
+An already released package version skips compilation and package uploads.
+`glycin-mini` and `libdecor-mini` build `glycin-ng` and `libdecor-rs`, and
+`mangohud` is not packaged for Arch Linux ARM, so there is no target repository
+version to compare. They check only the released version. Use `FORCE_BUILD=1`
+to explicitly rebuild an unchanged version.
 
 ## PKGBUILDs and version sync with the archlinux forks
 
@@ -88,7 +94,7 @@ others the plain Archlinux PKGBUILD is used. It is the one tagged
 (`[epoch-]pkgver-pkgrel`) with the version the port repo carries, not the latest
 one. A patch that does not apply cleanly fails the build.
 
-A package is only built when its PKGBUILD version equals the version that the
+For repository-backed packages, the PKGBUILD version must equal the version that the
 pacman repositories of the target architecture carry (`bin/check-upstream-version`,
 compared as strings). This avoids partial updates. On the
 emulated arches those repositories are the ones of the respective port, which

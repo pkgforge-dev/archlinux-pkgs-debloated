@@ -24,13 +24,13 @@ sed -i \
 
 cat "$PKGBUILD"
 
-# Do not build if version does not match with upstream
-# Only do it for x86_64 because aarch64 has no mangohud package
-if [ "$ARCH" = 'aarch64' ] || check-upstream-version; then
-	makepkg -fs --noconfirm --skippgpcheck
+# Arch Linux ARM does not publish mangohud, but don't rebuild an existing version.
+if [ "$ARCH" = 'aarch64' ]; then
+	check-upstream-version --released-only || exit 0
 else
-	exit 0
+	check-upstream-version || exit 0
 fi
+makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
 rm -fv ./*-docs-*.pkg.tar.* ./*-debug-*.pkg.tar.*

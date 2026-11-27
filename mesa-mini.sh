@@ -2,8 +2,6 @@
 
 set -e
 
-pacman -S --noconfirm patchelf
-
 get-pkgbuild
 
 cp -rv ./aux/mesa "$BUILD_DIR"/mesa-patches

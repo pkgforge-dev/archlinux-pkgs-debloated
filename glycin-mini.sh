@@ -11,6 +11,7 @@ cd "$BUILD_DIR"
 
 cat "$PKGBUILD"
 
+check-upstream-version --released-only || exit 0
 makepkg -fs --noconfirm --skippgpcheck
 
 ls -la
