@@ -19,7 +19,6 @@ install_build_deps() {
 		cmake      \
 		curl       \
 		git        \
-		mold       \
 		ninja      \
 		patchelf   \
 		unzip      \

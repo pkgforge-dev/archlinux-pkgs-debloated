@@ -59,7 +59,7 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 Build jobs run inside `ghcr.io/pkgforge-dev/archlinux:<arch>`, which is refreshed
 daily. `prepare-build` syncs the package database and installs only what the
 version check needs (`git`, `patch` and `wget`). The build dependencies
-(`base-devel`, `ccache`, `clang`, `cmake`, `curl`, `git`, `mold`, `ninja`,
+(`base-devel`, `ccache`, `clang`, `cmake`, `curl`, `git`, `ninja`,
 `patchelf`, `unzip` and `wget`) are installed by `bin/check-upstream-version`
 only when a package is actually going to be built, so jobs that skip an already
 released version never download the toolchain.
