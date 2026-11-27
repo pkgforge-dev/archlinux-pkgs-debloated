@@ -8,6 +8,22 @@
 
 set -e
 
+# Keeps the system current and installs what makepkg needs. It only runs when
+# the version checks pass, so jobs that skip a package never install it.
+install_build_deps() {
+	echo "Installing build dependencies..."
+	pacman -Syu --needed --noconfirm \
+		base-devel \
+		ccache     \
+		clang      \
+		cmake      \
+		curl       \
+		git        \
+		mold       \
+		ninja      \
+		wget
+}
+
 pkgver=$(awk -F'=' '/pkgver=/{print $2; exit}' "$PKGBUILD")
 pkgrel=$(awk -F'=' '/pkgrel=/{print $2; exit}' "$PKGBUILD")
 CURRENT_VERSION="$pkgver"-"$pkgrel"
@@ -38,8 +54,8 @@ else
 fi
 
 if [ "$1" = --released-only ]; then
+	install_build_deps
 	echo "Building package..."
-	pacman -Syu --noconfirm
 	exit 0
 fi
 
@@ -54,6 +70,6 @@ elif [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
 	:> ~/OPERATION_ABORTED
 	exit 1
 fi
+install_build_deps
 echo "Building package..."
-pacman -Syu --noconfirm
 echo "----------------------------------------------------------------"

@@ -56,26 +56,18 @@ This repo makes modified versiones of Archlinux packages, these are intended for
 
 # CI
 
-Build jobs run inside `ghcr.io/pkgforge-dev/archlinux-builder:<arch>`, an image
-that bakes in `base-devel`, `ccache`, `clang`, `cmake`, `curl`, `git`, `mold`,
-`ninja` and `wget` plus the initialized pacman keyring. The main win is keeping
-the toolchain in one place instead of installing it per job. On the
-GitHub-hosted native legs the ~2 GB image is pulled fresh on every job, so wall
-time there is roughly a wash versus installing the toolchain.
+Build jobs run inside `ghcr.io/pkgforge-dev/archlinux:<arch>`, which is refreshed
+daily. `prepare-build` upgrades the system and installs only what the version
+check needs (`git`, `patch` and `wget`). The build dependencies (`base-devel`,
+`ccache`, `clang`, `cmake`, `curl`, `git`, `mold`, `ninja` and `wget`) are
+installed by `bin/check-upstream-version` only when a package is actually going
+to be built, so jobs that skip an already released version never download the
+toolchain.
 
-The image is built per arch by the `build builder image` workflow and refreshed
-weekly. `prepare-build` only refreshes the package database (`pacman -Sy`), so
-`bin/check-upstream-version` compares against the current versions without
-upgrading the image. The full `pacman -Syu` runs right before a package is
-actually built, so jobs that skip keep the image's packages. When the toolchain
-is missing, `prepare-build` installs it, which also keeps the workflow usable
-with a plain `ghcr.io/pkgforge-dev/archlinux` base.
-
-Run `build builder image` manually once before the first build after merging
-(and whenever the `Dockerfile` changes). That first run pushes the package as
-private; the build jobs have `packages: read` and `build-emulated` logs in to
-ghcr, so they can still pull it. Making the package public in its settings is
-optional but matches the other pkgforge images.
+This replaced the per-arch `archlinux-builder` image. Pulling that ~640 MiB image
+cost as much as installing the toolchain (~260 MiB of packages), and every job
+paid for it even when it skipped the build. The plain ~190 MiB image is smaller
+and needs no image workflow to maintain.
 
 ## Automatic updates
 
