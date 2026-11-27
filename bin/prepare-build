@@ -32,6 +32,8 @@ if [ -n "$_install" ]; then
 		wget
 else
 	echo "Basic packages already installed"
+	# only refresh the database, the full upgrade runs before a build
+	pacman -Sy
 fi
 
 echo "------------------------------------------------------------"

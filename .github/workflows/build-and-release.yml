@@ -6,6 +6,7 @@ concurrency:
 on:
   schedule:
     - cron: "0 3 1/5 * *"
+    - cron: "17 15 * * *" # Native architectures
   workflow_dispatch:
     inputs:
       ONE_PACKAGE:
@@ -31,7 +32,7 @@ on:
 jobs:
   build:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
-    if: ${{ github.event.inputs.REGENERATE_INDEX_ONLY != '1' && (github.event.inputs.ARCH == '' || github.event.inputs.ARCH == 'x86_64' || github.event.inputs.ARCH == 'aarch64') }}
+    if: ${{ github.event.schedule != '0 3 1/5 * *' && github.event.inputs.REGENERATE_INDEX_ONLY != '1' && (github.event.inputs.ARCH == '' || github.event.inputs.ARCH == 'x86_64' || github.event.inputs.ARCH == 'aarch64') }}
     permissions:
       actions: read
       security-events: write
@@ -61,7 +62,7 @@ jobs:
           - libdecor-mini
           - intel-media-driver-mini
           - glycin-mini
-          - gtk2-mini
+          # - gtk2-mini # upstream inactive, not built for now
           - webkit2gtk-4.1-mini
         arch: [x86_64, aarch64]
         include:
@@ -107,7 +108,7 @@ jobs:
         run: /bin/sh ./bin/build-package ${{ matrix.script }}.sh
 
       - name: Upload artifact
-        if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
+        if: ${{ hashFiles('dist/*.pkgver') != '' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ format('{0}-{1}', matrix.script, matrix.arch) }}
@@ -116,7 +117,7 @@ jobs:
       # release as soon as this package finishes instead of waiting for the
       # whole matrix to complete
       - name: release
-        if: ${{ github.ref_name == 'main' && (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
+        if: ${{ github.ref_name == 'main' && hashFiles('dist/*.pkgver') != '' }}
         uses: softprops/action-gh-release@e598afbe1493e6b1bafb1f389cabb956eab91231 # v3.0.3
         with:
           name: "Continuous build"
@@ -132,7 +133,7 @@ jobs:
   # are confirmed to build are part of the matrix for now
   build-emulated:
     name: "Build: ${{ matrix.script }} (${{ matrix.arch }})"
-    if: ${{ github.event.inputs.REGENERATE_INDEX_ONLY != '1' && github.event.inputs.SKIP_EMULATED != '1' && (github.event.inputs.ARCH == '' || (github.event.inputs.ARCH != 'x86_64' && github.event.inputs.ARCH != 'aarch64')) }}
+    if: ${{ github.event.schedule != '17 15 * * *' && github.event.inputs.REGENERATE_INDEX_ONLY != '1' && github.event.inputs.SKIP_EMULATED != '1' && (github.event.inputs.ARCH == '' || (github.event.inputs.ARCH != 'x86_64' && github.event.inputs.ARCH != 'aarch64')) }}
     permissions:
       actions: read
       security-events: write
@@ -218,7 +219,7 @@ jobs:
             /bin/sh -euc '/bin/sh ./bin/prepare-build && /bin/sh ./bin/build-package ${{ matrix.script }}.sh'
 
       - name: Upload artifact
-        if: ${{ (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
+        if: ${{ hashFiles('dist/*.pkgver') != '' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ format('{0}-{1}', matrix.script, matrix.arch) }}
@@ -227,7 +228,7 @@ jobs:
       # release as soon as this package finishes instead of waiting for the
       # whole matrix to complete
       - name: release
-        if: ${{ github.ref_name == 'main' && (github.event.inputs.ONE_PACKAGE == '' || contains(matrix.script, github.event.inputs.ONE_PACKAGE)) && (github.event.inputs.ARCH == '' || matrix.arch == github.event.inputs.ARCH) }}
+        if: ${{ github.ref_name == 'main' && hashFiles('dist/*.pkgver') != '' }}
         uses: softprops/action-gh-release@e598afbe1493e6b1bafb1f389cabb956eab91231 # v3.0.3
         with:
           name: "Continuous build"

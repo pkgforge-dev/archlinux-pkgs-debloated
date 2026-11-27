@@ -3,7 +3,8 @@
 # This script compares the version of the PKGBUILD with the version that was
 # already released, and with the upstream version. This is to avoid rebuilding a
 # package that is already released and to avoid pushing packages that are too
-# new causing partial updates as result
+# new causing partial updates as result. Pass --released-only for a package
+# that has no version to match in the target repository.
 
 set -e
 
@@ -36,6 +37,12 @@ else
 	echo "----------------------------------------------------------------"
 fi
 
+if [ "$1" = --released-only ]; then
+	echo "Building package..."
+	pacman -Syu --noconfirm
+	exit 0
+fi
+
 UPSTREAM_VERSION=$(pacman -Ss "^$PACKAGE$" | awk '{print $2; exit}' | sed 's/^[0-9]\+://')
 
 echo "UPSTREAM version: $UPSTREAM_VERSION"
@@ -48,4 +55,5 @@ elif [ "$CURRENT_VERSION" != "$UPSTREAM_VERSION" ]; then
 	exit 1
 fi
 echo "Building package..."
+pacman -Syu --noconfirm
 echo "----------------------------------------------------------------"
